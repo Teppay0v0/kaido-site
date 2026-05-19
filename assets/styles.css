@@ -1,0 +1,2304 @@
+:root{
+  /* Visual-book / catalog direction — palette refreshed from the rooms-page reference.
+     全面白背景 + dark ink + warm-brown accent。
+     旧mincho版で和紙色だったところはすべて pure white に統一。 */
+  --bg:#ffffff;          /* pure white — page base */
+  --bg-2:#ffffff;        /* (旧パレットでセクション差を出していた色 — 今は同じ) */
+  --ink:#222222;         /* nearly-black body ink */
+  --ink-soft:#3d3d3d;    /* dark gray body text */
+  --ink-mute:#8a8a8a;    /* mid gray — labels & captions */
+  --line:#e3e0d8;        /* hairline (faint warm tone を残してコクを保つ) */
+  --accent:#904848;      /* brick red — 参考PDFから正確採取 (rgb 164,70,70) */
+  --accent-2:#3a3a32;    /* ishi - stone grey */
+  --accent-3:#5a4a2e;    /* ki - timber */
+  --accent-4:#1c2230;    /* sora - night sky */
+  /* Gothic font system — visual-book direction.
+     変数名は --serif* のまま残しているが、中身はゴシック(サンセリフ)。
+     全セレクタを書き換える代わりに変数値だけ差し替えて影響を最小化。 */
+  /* PDF指示: 英文含め全て Zen Kaku Gothic New Bold で統一 */
+  --serif:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --serif-en:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+  --serif-it:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --maroon:#904848;      /* 地色 (header/footer/hero) — accentと同値 */
+  --cream:#f3efe7;       /* マルーン上の文字・ロゴ色 */
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-weight:400;
+  line-height:1.85;
+  letter-spacing:.04em;
+  overflow-x:hidden;
+  font-feature-settings:"palt","kern","liga";
+  text-rendering:geometricPrecision;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+::selection{background:rgba(122,74,38,.18);color:var(--ink)}
+
+/* paper grain overlay — visual book direction では純白に統一するため無効化。
+   復活させたい場合は display:none を外して opacity を .35 程度に。 */
+body::before{display:none}
+
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ============ HEADER ============ */
+.header{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 44px;
+  transition:background .5s ease, padding .4s ease;
+  mix-blend-mode:normal;
+}
+.header.scrolled{
+  background:rgba(243,239,231,.88);
+  backdrop-filter:blur(18px) saturate(1.1);
+  -webkit-backdrop-filter:blur(18px) saturate(1.1);
+  padding:14px 44px;
+  border-bottom:1px solid var(--line);
+  box-shadow:0 1px 0 rgba(255,255,255,.4) inset;
+}
+.header.on-hero{color:#f3efe7}
+.header.on-hero .nav a, .header.on-hero .lang, .header.on-hero .reserve-btn{color:#f3efe7}
+.header.on-hero .reserve-btn{border-color:#f3efe7}
+
+.logo{
+  display:flex;align-items:baseline;gap:14px;
+  flex-shrink:0;
+}
+.logo-img{
+  height:64px;
+  width:auto;
+  max-width:none;       /* override global img{max-width:100%} so narrow viewports don't squash the logo */
+  flex-shrink:0;
+  object-fit:contain;
+  display:block;
+  /* logo source is white. Invert to black on light backgrounds (after scroll). */
+  filter:invert(0);
+  opacity:.95;
+  transition:filter .5s ease, height .5s ease, opacity .5s ease, transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.logo:hover .logo-img{transform:translateY(-1px);opacity:1}
+.header.scrolled .logo-img{
+  height:52px;
+  filter:invert(1);   /* white → black on the light header */
+  opacity:1;
+}
+.header.on-hero .logo-img{
+  filter:invert(0);   /* keep white over the hero photo */
+  opacity:.85;        /* slightly muted so it doesn't compete with the photo's brass logo */
+}
+.nav{
+  display:flex;align-items:center;gap:38px;
+  font-family:var(--serif-en);
+  font-size:13px;
+  letter-spacing:.32em;
+  font-weight:400;
+  text-transform:uppercase;
+}
+.nav a{
+  position:relative;
+  padding:6px 0;
+  transition:opacity .3s;
+}
+.nav a::after{
+  content:"";
+  position:absolute;left:50%;bottom:0;
+  width:0;height:1px;
+  background:currentColor;
+  transition:width .55s cubic-bezier(.2,.7,.2,1), left .55s cubic-bezier(.2,.7,.2,1);
+}
+.nav a:hover{letter-spacing:.36em}
+.nav a:hover::after{width:100%;left:0}
+.nav a{transition:letter-spacing .45s cubic-bezier(.2,.7,.2,1)}
+
+.header-right{display:flex;align-items:center;gap:28px}
+
+/* ============ HAMBURGER + MOBILE MENU ============ */
+.menu-toggle{
+  display:none;
+  width:32px;height:22px;
+  position:relative;
+  background:transparent;border:0;
+  padding:0;margin-left:14px;
+  cursor:pointer;
+  z-index:102;
+  color:inherit;
+}
+.menu-toggle span{
+  position:absolute;left:0;
+  width:100%;height:1px;
+  background:currentColor;
+  transition:transform .45s cubic-bezier(.4,0,.2,1),
+             top .45s cubic-bezier(.4,0,.2,1),
+             opacity .25s ease;
+}
+.menu-toggle span:nth-child(1){top:5px}
+.menu-toggle span:nth-child(2){top:11px}
+.menu-toggle span:nth-child(3){top:17px}
+.menu-toggle.is-open span:nth-child(1){top:11px;transform:rotate(45deg)}
+.menu-toggle.is-open span:nth-child(2){opacity:0}
+.menu-toggle.is-open span:nth-child(3){top:11px;transform:rotate(-45deg)}
+
+.mobile-menu{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:101;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:80px 32px 56px;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(-8px);
+  transition:opacity .55s ease, transform .6s cubic-bezier(.2,.7,.2,1), visibility 0s linear .6s;
+  pointer-events:none;
+  overflow-y:auto;
+}
+.mobile-menu::before{display:none}    /* paper texture 撤去 — 純白に統一 */
+.mobile-menu.is-open{
+  opacity:1;visibility:visible;
+  transform:translateY(0);
+  transition:opacity .55s ease, transform .6s cubic-bezier(.2,.7,.2,1), visibility 0s;
+  pointer-events:auto;
+}
+.mobile-menu-inner{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;
+  max-width:420px;
+}
+.mobile-menu-list{
+  list-style:none;
+  display:flex;flex-direction:column;
+  text-align:center;
+  margin:0 0 44px;
+  padding:0;
+  width:100%;
+}
+.mobile-menu-list li{
+  border-bottom:1px solid var(--line);
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.mobile-menu.is-open .mobile-menu-list li{opacity:1;transform:translateY(0)}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(1){transition-delay:.10s}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(2){transition-delay:.16s}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(3){transition-delay:.22s}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(4){transition-delay:.28s}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(5){transition-delay:.34s}
+.mobile-menu.is-open .mobile-menu-list li:nth-child(6){transition-delay:.40s}
+.mobile-menu-list a{
+  display:block;
+  padding:18px 0;
+  font-family:var(--serif);
+  font-size:22px;
+  font-weight:500;
+  letter-spacing:.22em;
+  color:var(--ink);
+  position:relative;
+  transition:color .4s ease, letter-spacing .5s cubic-bezier(.2,.7,.2,1);
+}
+.mobile-menu-list a::after{
+  content:"";
+  position:absolute;
+  left:50%;bottom:14px;
+  width:0;height:1px;
+  background:var(--accent);
+  transition:width .5s cubic-bezier(.2,.7,.2,1), left .5s cubic-bezier(.2,.7,.2,1);
+}
+.mobile-menu-list a:hover,.mobile-menu-list a:focus-visible{
+  color:var(--accent);
+  letter-spacing:.28em;
+}
+.mobile-menu-list a:hover::after,.mobile-menu-list a:focus-visible::after{width:48%;left:26%}
+
+.mobile-menu-meta{
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .6s ease .5s, transform .6s cubic-bezier(.2,.7,.2,1) .5s;
+}
+.mobile-menu.is-open .mobile-menu-meta{opacity:1;transform:translateY(0)}
+.mobile-menu .lang{
+  font-family:var(--serif-en);
+  font-size:13px;
+  letter-spacing:.4em;
+  display:flex;gap:12px;align-items:center;
+}
+.mobile-menu .lang span{transition:opacity .35s ease;cursor:pointer}
+.mobile-menu .lang span:not(.divider):not(.active){opacity:.55}
+.mobile-menu .lang span:not(.divider):not(.active):hover{opacity:1}
+.mobile-menu .lang span.active{font-weight:500}
+.mobile-menu .lang span.divider{opacity:.4}
+.mobile-menu .reserve-btn{
+  border:1px solid var(--ink);
+  padding:18px 44px;
+  font-family:var(--serif-en);
+  font-size:12px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--ink);
+  position:relative;overflow:hidden;
+  transition:color .4s ease, letter-spacing .5s cubic-bezier(.2,.7,.2,1);
+}
+.mobile-menu .reserve-btn::before{
+  content:"";position:absolute;inset:0;
+  background:var(--ink);
+  transform:translateY(101%);
+  transition:transform .45s cubic-bezier(.7,0,.2,1);
+  z-index:-1;
+}
+.mobile-menu .reserve-btn:hover{color:var(--bg);letter-spacing:.48em}
+.mobile-menu .reserve-btn:hover::before{transform:translateY(0)}
+
+body.menu-open{overflow:hidden}
+.lang{
+  font-family:var(--serif-en);
+  font-size:12px;
+  letter-spacing:.3em;
+  display:flex;gap:10px;
+  align-items:center;
+}
+.lang span{transition:opacity .35s ease}
+.lang span:not(.divider){cursor:pointer}
+.lang span:not(.divider):not(.active){opacity:.55}
+.lang span:not(.divider):not(.active):hover{opacity:1}
+.lang span.active{font-weight:500;letter-spacing:.34em}
+.lang span.divider{opacity:.4}
+.reserve-btn{
+  border:1px solid var(--ink);
+  padding:11px 26px;
+  font-family:var(--serif-en);
+  font-size:12px;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  transition:color .4s ease, border-color .4s ease, letter-spacing .5s cubic-bezier(.2,.7,.2,1);
+  position:relative;
+  overflow:hidden;
+}
+.reserve-btn:hover{letter-spacing:.4em}
+.reserve-btn::before{
+  content:"";position:absolute;inset:0;
+  background:var(--ink);
+  transform:translateY(101%);
+  transition:transform .4s cubic-bezier(.7,0,.2,1);
+  z-index:-1;
+}
+.reserve-btn:hover{color:var(--bg);border-color:var(--ink)}
+.reserve-btn:hover::before{transform:translateY(0)}
+.header.on-hero .reserve-btn::before{background:#f3efe7}
+.header.on-hero .reserve-btn:hover{color:var(--ink-soft)}
+
+/* ============ HERO (scroll-driven 2-stage reveal) ============ */
+/* The .hero section is TALL so the user has scroll distance to drive the transition.
+   Inside it, .hero-stage is sticky (full-viewport) and stays pinned while progress 0→1 happens.
+   Stage 1 (progress 0 → 0.66): hero1 is clipped from the left, gradually exposing 2/3 of hero2 from the right.
+   Pause at 0.66 (hero1 occupies left 1/3, hero2 fills the right 2/3 — actually the full underlay).
+   Stage 2 (progress 0.66 → 1.0): the remaining left-1/3 piece of hero1 is clipped from the bottom up.
+   End: only hero2 visible. */
+.hero{
+  position:relative;
+  height:300vh;          /* 3 viewport-heights of scroll to drive animation + pause */
+  background:#1a1612;
+}
+.hero-stage{
+  position:sticky;
+  top:0;
+  height:100vh;
+  min-height:640px;
+  width:100%;
+  overflow:hidden;
+}
+.hero-layer{
+  position:absolute;inset:0;
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+  will-change:clip-path;
+}
+.hero-layer.hero-base{
+  background-image:url("images/hero2-entrance.jpg");
+  z-index:1;
+}
+.hero-layer.hero-front{
+  background-image:url("images/hero1-brass-logo.jpg");
+  z-index:2;
+  /* 引きの絵: ロゴ合わせ拡大をやめ、素の cover で全体を見せる */
+  background-size:cover;
+  background-position:center 42%;
+  background-repeat:no-repeat;
+  /* clip-path is driven by JS via inset values. Default = fully visible. */
+  clip-path: inset(0% 0% var(--clip-b, 0%) var(--clip-l, 0%));
+}
+/* subtle vignette for legibility of overlay text */
+.hero-vignette{
+  position:absolute;inset:0;
+  z-index:3;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.05) 35%, rgba(0,0,0,.45) 100%);
+}
+
+.hero-overlay{
+  position:absolute;inset:0;
+  z-index:4;
+  pointer-events:none;
+  /* scroll-driven opacity from JS */
+  opacity:1;
+}
+.hero-overlay > *{pointer-events:auto}
+
+.hero-content{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:0 80px 140px;
+  color:#f3efe7;
+}
+.hero-content .hero-tag{
+  font-family:var(--serif);
+  font-size:13px;
+  letter-spacing:.4em;
+  margin-bottom:28px;
+  display:flex;align-items:center;gap:20px;
+  opacity:0;
+  animation:fadeUp 1.2s .4s forwards;
+}
+.hero-content .hero-tag::before{
+  content:"";width:48px;height:1px;background:rgba(243,239,231,.65);
+}
+.hero-content .hero-jp{
+  opacity:0;
+  animation:fadeUp 1.2s .9s forwards;
+}
+.hero-content .kanji-en{
+  font-family:var(--serif-en);
+  font-weight:300;
+  font-size:clamp(36px, 5.4vw, 78px);
+  line-height:1.12;
+  letter-spacing:.015em;
+  color:#f3efe7;
+  font-feature-settings:"kern","liga","dlig";
+  text-shadow:0 2px 24px rgba(0,0,0,.25);
+}
+.hero-content .kanji-en em{
+  font-family:var(--serif-it);
+  font-style:italic;
+  color:#dcc18a;
+  font-weight:300;
+  letter-spacing:.02em;
+  padding:0 .04em;
+}
+.hero-meta{
+  position:absolute;
+  bottom:46px;left:80px;right:80px;
+  display:flex;justify-content:space-between;align-items:flex-end;
+  font-family:var(--serif-en);
+  font-size:11px;
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:#f3efe7;
+  opacity:0;
+  animation:fadeUp 1.2s 1.3s forwards;
+}
+/* Vertical-mode variant: same element has BOTH .hero-meta and .vert classes.
+   Centered vertically and horizontally, larger, fades out as user begins to scroll.
+   The base opacity is .92 (after intro fade-up); JS multiplies it by --hero-vert-fade
+   (set on .hero-overlay) so the text dissolves before the scroll-line crosses the screen. */
+.hero-meta.vert{
+  display:block;
+  writing-mode:vertical-rl;
+  left:50%;
+  right:auto;
+  top:50%;
+  bottom:auto;
+  transform:translate(-50%, -50%);
+  font-family:var(--serif);
+  font-size:34px;
+  letter-spacing:.55em;
+  font-weight:500;
+  text-transform:none;
+  color:#f3efe7;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);
+  /* Entrance: animation fades opacity 0 -> .92 over 1.6s starting at 1.3s.
+     After settle, JS sets inline `opacity` directly based on scroll, which
+     overrides the animation's end state. */
+  opacity:0;
+  animation:fadeUpCenter 1.6s 1.3s forwards;
+  pointer-events:none;
+  white-space:nowrap;
+}
+@keyframes fadeUpCenter{
+  from{opacity:0;transform:translate(-50%, calc(-50% + 24px))}
+  to  {opacity:.92;transform:translate(-50%, -50%)}
+}
+.scroll-indicator{
+  display:flex;align-items:center;gap:16px;
+  font-size:11px;letter-spacing:.5em;
+  text-transform:uppercase;
+}
+.scroll-indicator .line{
+  width:72px;height:1px;background:rgba(243,239,231,.32);
+  position:relative;overflow:hidden;
+}
+.scroll-indicator .line::after{
+  content:"";position:absolute;
+  width:36%;height:100%;
+  background:linear-gradient(90deg, transparent 0%, #f3efe7 50%, transparent 100%);
+  animation:scroll-line 2.6s cubic-bezier(.5,.1,.5,.9) infinite;
+}
+@keyframes scroll-line{
+  0%{left:-36%}
+  100%{left:100%}
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ============ SECTION COMMON ============ */
+section{position:relative;z-index:2}
+.section-tag{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:13px;
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  color:var(--accent);
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:32px;
+}
+.section-tag::before{
+  content:"";width:32px;height:1px;background:var(--accent);
+}
+.section-num{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:13px;
+  letter-spacing:.32em;
+  color:var(--ink-mute);
+  display:inline-flex;align-items:center;gap:14px;
+  margin-bottom:28px;
+}
+.section-num::after{
+  content:"";
+  width:24px;height:1px;
+  background:var(--ink-mute);
+  opacity:.55;
+  transition:width .6s cubic-bezier(.2,.7,.2,1);
+}
+section:hover .section-num::after,
+.reveal.in .section-num::after{width:42px;opacity:.85}
+.h-display{
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:clamp(34px, 4.4vw, 64px);
+  line-height:1.35;
+  letter-spacing:.06em;
+  font-feature-settings:"palt","kern";
+}
+.h-display em{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-weight:300;
+  color:var(--accent);
+  position:relative;
+  padding:0 .04em;
+}
+/* 棲家 などの和文サフィックスを差し色に(emと違って書体・斜体は維持) */
+.h-display .accent-word{
+  color:var(--accent);
+}
+
+/* ============ INTRO / SLOGAN ============ */
+.intro{
+  padding:160px 80px 180px;
+  position:relative;
+  /* overflow:visible — we removed overflow:hidden so the .rooms wave can extend
+     upward into .intro's bottom space without being clipped. */
+}
+/* ----- Concept decoration: 観音開き doors over the English slogan ----- */
+/* Two paper panels cover the slogan, meet at the center on a thin accent seam,
+   and slide outward as the section enters view — literally enacting 「開く」.
+   The doors ARE the entrance animation, so we skip the default reveal fade
+   on this element (otherwise the panels would be semi-transparent during fade-in
+   and the text behind would leak through). */
+.intro-slogan.reveal{opacity:1;transform:none;transition:none}
+.intro-slogan{position:relative}
+.slogan-doors{
+  position:absolute;
+  inset:-12px -28px;
+  display:block;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:3;
+}
+.slogan-door{
+  position:absolute;
+  top:0;bottom:0;
+  width:50%;
+  background:var(--bg);
+  /* subtle inner darkness so the panel feels like material, not flat colour */
+  box-shadow:inset 0 0 28px rgba(122,74,38,.07);
+  transition:transform 1.8s .35s cubic-bezier(.62,.04,.18,1);
+  will-change:transform;
+}
+.slogan-door-l{
+  left:0;
+  /* the seam line where the two panels meet — barely-there accent */
+  border-right:1px solid rgba(122,74,38,.22);
+}
+.slogan-door-r{right:0}
+.intro-slogan.in .slogan-door-l{transform:translateX(-101%)}
+.intro-slogan.in .slogan-door-r{transform:translateX(101%)}
+
+
+.intro::before{
+  /* vertical hairline that descends from the section top */
+  content:"";
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  width:1px;height:90px;
+  background:var(--line);
+  animation:lineDrop 1.4s 0.3s cubic-bezier(.2,.7,.2,1) forwards;
+}
+@keyframes lineDrop{
+  to{transform:translateX(-50%) scaleY(1)}
+}
+.intro-grid{
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:120px;
+  max-width:1400px;
+  margin:0 auto;
+  align-items:start;
+}
+.intro-left{position:sticky;top:140px}
+.intro-vert{
+  writing-mode:vertical-rl;
+  font-family:var(--serif);
+  font-size:15px;
+  letter-spacing:.5em;
+  color:var(--ink-mute);
+  height:300px;
+  border-right:1px solid var(--line);
+  padding-right:18px;
+  position:relative;
+}
+.intro-vert::after{
+  content:"";
+  position:absolute;
+  right:-1px;top:0;
+  width:1px;height:0;
+  background:var(--accent);
+  animation:vlineDraw 2s 0.6s cubic-bezier(.2,.7,.2,1) forwards;
+}
+@keyframes vlineDraw{to{height:42%}}
+.intro-slogan{
+  font-family:var(--serif-en);
+  font-weight:300;
+  font-size:clamp(40px, 5.4vw, 76px);
+  line-height:1.18;
+  letter-spacing:.005em;
+  color:var(--ink);
+  margin-bottom:52px;
+  font-feature-settings:"kern","liga","dlig";
+}
+.intro-slogan .it{
+  font-family:var(--serif-it);
+  font-style:italic;
+  color:var(--accent);
+  letter-spacing:.01em;
+  padding:0 .04em;
+}
+.intro-slogan .br{display:block}
+
+.intro-jp-title{
+  font-family:var(--serif);
+  font-size:23px;
+  font-weight:500;
+  letter-spacing:.4em;
+  margin-bottom:56px;
+  display:flex;align-items:center;gap:18px;
+  transition:letter-spacing .7s cubic-bezier(.2,.7,.2,1);
+}
+.intro-jp-title::before{
+  content:"";width:42px;height:1px;background:var(--ink);
+  transition:width .7s cubic-bezier(.2,.7,.2,1);
+}
+.intro-right:hover .intro-jp-title{letter-spacing:.46em}
+.intro-right:hover .intro-jp-title::before{width:64px}
+
+.intro-body{
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:2.3;
+  color:var(--ink-soft);
+  letter-spacing:.09em;
+  max-width:560px;
+}
+.intro-body p+p{margin-top:1.7em}
+.intro-body .em{
+  color:var(--accent);
+  font-style:normal;
+  font-weight:500;
+  position:relative;
+  padding:0 .06em;
+  background-image:linear-gradient(transparent 70%, rgba(122,74,38,.08) 70%);
+}
+
+/* ============ ROOMS — visual-book catalog layout ============
+   参考画像のレイアウトに準拠。タイトル + サブタイトル + 4行(kanji|EN|photo|info)のグリッド。
+   写真は縦に隙間なく並び、左右のテキストは各写真の高さに垂直中央揃え。
+   旧 mincho版にあった .room-row, .room-visual, .room-link 等は撤去。 */
+.rooms{
+  background:#ffffff;
+  padding:160px 80px 200px;
+  position:relative;
+}
+
+/* ---- ヘッダー (ROOMS + subtitle) ---- */
+.rooms-header{
+  text-align:center;
+  margin-bottom:200px;
+}
+/* ROOMS見出し — モリサワ書体の画像。テキストではなく <img> を中央配置。 */
+.rooms-title{
+  margin:0 0 32px;
+  line-height:1;
+}
+.rooms-title img{
+  display:block;
+  margin:0 auto;
+  width:clamp(220px, 22vw, 340px);
+  height:auto;
+}
+.rooms-subtitle{
+  font-family:var(--serif);
+  font-size:15px;
+  font-weight:400;
+  color:var(--accent);
+  letter-spacing:.06em;
+  margin:0;
+}
+
+/* ---- 各行: 1fr auto 1fr で写真を完全センター ----
+   左右の 1fr が対称なので photo(中央 auto列) が常に画面中央。
+   .room-row 同士は隙間ゼロ → 写真が縦に連続する。 */
+.room-list{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.room-row{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+}
+/* 固定幅グリッドにして 空/木/石/土 と EN を行ごとに縦一列で揃える。
+   flex+gap だと EN(SORA/KI/ISHI/TSUCHI)の幅差で漢字位置がズレるため。 */
+.room-label{
+  justify-self:end;
+  display:grid;
+  grid-template-columns:56px 110px;   /* kanji列 | EN列 (両方固定) */
+  align-items:center;
+  column-gap:24px;
+  padding-right:72px;
+}
+.room-kanji{
+  font-family:var(--serif);
+  font-size:50px;
+  font-weight:500;
+  color:var(--accent);
+  line-height:1;
+  text-align:center;
+}
+.room-en{
+  font-family:var(--serif-en);
+  font-size:13px;
+  font-weight:300;
+  letter-spacing:.34em;
+  color:var(--accent);
+  text-align:left;
+}
+.room-photo{
+  width:320px;
+  aspect-ratio:4 / 3;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+/* 右列 (4F + desc) は写真と垂直中央揃え、左寄せ */
+.room-info{
+  justify-self:start;
+  padding-left:72px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.room-info .floor{
+  font-family:var(--serif-en);
+  font-size:14px;
+  font-weight:400;
+  color:var(--accent);
+  letter-spacing:.06em;
+}
+.room-info .desc{
+  font-family:var(--serif);
+  font-size:13px;
+  font-weight:400;
+  color:var(--accent);
+  line-height:1.9;
+  margin:0;
+}
+
+/* ============ EXPERIENCE / PHILOSOPHY ============ */
+.philosophy{
+  padding:200px 80px 220px;
+  position:relative;
+  overflow:hidden;
+}
+/* ----- Philosophy decoration: 観音開き doors (vertical axis) over the headline ----- */
+/* Variation on Concept's reveal — here the two panels meet HORIZONTALLY and
+   slide apart vertically. Same metaphor of 「開く」, expressed on the other axis. */
+.philosophy-quote.reveal{opacity:1;transform:none;transition:none}
+.philosophy-quote{position:relative}
+.quote-doors{
+  position:absolute;
+  inset:-10px -20px;
+  display:block;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:3;
+}
+.quote-door{
+  position:absolute;
+  left:0;right:0;
+  height:50%;
+  background:var(--bg);
+  box-shadow:inset 0 0 28px rgba(122,74,38,.07);
+  transition:transform 1.8s .35s cubic-bezier(.62,.04,.18,1);
+  will-change:transform;
+}
+.quote-door-t{
+  top:0;
+  border-bottom:1px solid rgba(122,74,38,.22);
+}
+.quote-door-b{bottom:0}
+.philosophy-quote.in .quote-door-t{transform:translateY(-101%)}
+.philosophy-quote.in .quote-door-b{transform:translateY(101%)}
+
+
+.philosophy::before{
+  content:"";
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  width:1px;height:80px;
+  background:var(--line);
+  animation:lineDrop 1.4s .3s cubic-bezier(.2,.7,.2,1) forwards;
+  z-index:3;
+}
+.philosophy-bg{
+  position:absolute;
+  top:0;right:0;bottom:0;
+  width:48%;
+  z-index:0;
+  overflow:hidden;
+  background:#1a1612;       /* fallback while slides load */
+}
+/* Slideshow stack — multiple background-image divs, cross-fade controlled by JS. */
+.philosophy-slides{
+  position:absolute;inset:0;
+  z-index:0;
+}
+.philosophy-slide{
+  position:absolute;inset:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:0;
+  /* 2s dissolve — slow enough to feel deliberate. */
+  transition:opacity 2s ease-in-out;
+  will-change:opacity;
+}
+.philosophy-slide.is-active{opacity:1}
+.philosophy-bg::before{
+  content:"";position:absolute;inset:0;
+  z-index:1;
+  /* Brightened — gradient is now lighter so the photos read clearly underneath. */
+  background:
+    linear-gradient(135deg, rgba(40,28,16,.28) 0%, rgba(20,14,8,.48) 100%);
+}
+.philosophy-bg::after{
+  content:"";position:absolute;inset:0;
+  z-index:2;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(220,190,140,.18) 0%, transparent 55%);
+}
+.philosophy-bg-vert{
+  position:absolute;
+  top:80px;right:60px;
+  writing-mode:vertical-rl;
+  color:rgba(243,239,231,.55);
+  font-family:var(--serif);
+  font-size:18px;
+  letter-spacing:.55em;
+  z-index:3;
+  text-shadow:0 1px 16px rgba(0,0,0,.4);
+}
+
+.philosophy-inner{
+  position:relative;z-index:2;
+  max-width:1500px;margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 48%;
+  gap:0;
+}
+.philosophy-text{padding-right:80px}
+.philosophy-quote{
+  font-family:var(--serif);
+  font-size:clamp(28px, 3.4vw, 48px);
+  font-weight:400;
+  line-height:1.6;
+  letter-spacing:.1em;
+  margin-bottom:64px;
+  color:var(--ink);
+  font-feature-settings:"palt","kern";
+}
+.philosophy-quote em{
+  font-family:var(--serif-it);
+  font-style:italic;
+  color:var(--accent);
+  font-weight:300;
+  position:relative;
+  padding:0 .04em;
+}
+.philosophy-quote em::after{
+  content:"";
+  position:absolute;
+  left:.04em;right:.04em;bottom:.06em;
+  height:1px;
+  background:var(--accent);
+  opacity:.25;
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+.reveal.in .philosophy-quote em::after{transform:scaleX(1)}
+.philosophy-quote .lg{
+  font-size:1.3em;
+  display:block;
+  margin:.2em 0;
+}
+.philosophy-body{
+  font-size:15.5px;
+  line-height:2.3;
+  color:var(--ink-soft);
+  max-width:520px;
+  letter-spacing:.08em;
+}
+.philosophy-body p+p{margin-top:1.6em}
+
+/* ============ ATELIER — 4 random photos placed onto a desk ============ */
+/* The .atelier section is tall so the user has scroll distance to "place" 4 photos one by one.
+   .atelier-stage is sticky/100vh and holds the desk. As the user scrolls, each photo descends from
+   above with a slight rotation, fades in, settles with a tiny bounce, and stays — the next photo
+   then arrives next to it, slightly overlapping. The 4 photos shown are picked at random from a
+   pool of 7 each time the page loads, so the composition feels fresh on every visit. */
+.atelier{
+  position:relative;
+  height:280vh;       /* runway: was 560vh, halved per request — feels snappier */
+  background:var(--bg);
+}
+.atelier::before{
+  /* warm radial wash to feel like soft lamplight on the desk */
+  content:"";
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255,243,220,.45) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(122,90,52,.08) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+.atelier-stage{
+  position:sticky;top:0;
+  height:100vh;
+  width:100%;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ===== Soft wind trail =====
+   A faint hairline that drifts across the desk when a new photo lands.
+   The photos themselves don't move — only this wisp passes by.
+   Color is the warm earth ink at very low opacity so it reads as a draft of air,
+   not as a graphic line. */
+/* SVG-based wisp — multiple long, pale, flowing curves layered together
+   to read as a gentle drift of air. Stroke colour & width are set inline per stroke
+   so each layer can vary independently. */
+.atelier-wisp{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:50;
+  overflow:visible;
+}
+.atelier-wisp path{
+  fill:none;
+  stroke-linecap:round;
+}
+@media (prefers-reduced-motion:reduce){
+  .atelier-wisp{display:none}
+}
+
+.atelier-intro{
+  position:absolute;
+  top:14vh;
+  left:50%;transform:translateX(-50%);
+  text-align:center;
+  z-index:1;
+  pointer-events:none;
+}
+.atelier-intro .num{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:13px;
+  letter-spacing:.32em;
+  color:var(--ink-mute);
+  margin-bottom:18px;
+  display:inline-flex;
+  align-items:center;
+  gap:14px;
+}
+.atelier-intro .num::before,
+.atelier-intro .num::after{
+  content:"";
+  width:28px;height:1px;
+  background:var(--ink-mute);
+  opacity:.55;
+}
+.atelier-intro .title{
+  font-family:var(--serif-en);
+  font-weight:300;
+  font-size:clamp(36px, 4.6vw, 64px);
+  line-height:1.2;
+  letter-spacing:.01em;
+  color:var(--ink);
+}
+.atelier-intro .title em{
+  font-family:var(--serif-it);
+  font-style:italic;
+  color:var(--accent);
+}
+.atelier-intro .sub{
+  display:block;
+  margin-top:18px;
+  font-family:var(--serif);
+  font-size:15px;
+  letter-spacing:.4em;
+  color:var(--ink-mute);
+}
+
+.atelier-desk{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+/* Each photo is 3:2 landscape (matches the source images). Position is set per slot.
+   The photo's center is anchored to (left:50%, top:50%) of the desk; --rest-x/--rest-y are
+   percentage offsets from that center; --rest-r is the resting rotation. */
+.atelier-photo{
+  position:absolute;
+  left:50%;top:50%;
+  width:45.6vw;
+  max-width:672px;
+  aspect-ratio:3/2;
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.6) inset,
+    0 0 0 1px rgba(0,0,0,.04),
+    0 14px 28px -8px rgba(40,28,18,.18),
+    0 4px 10px -4px rgba(40,28,18,.14);
+  opacity:0;
+  /* initial: at the resting position on the desk, but enlarged and transparent.
+     As scroll progresses, the photo fades in and shrinks to its rest scale —
+     as if a print is being lowered toward the desk and brought into focus. */
+  transform:translate3d(calc(-50% + var(--rest-x, 0%)), calc(-50% + var(--rest-y, 0%)), 0) rotate(var(--rest-r, 0deg)) scale(1.4);
+  transition:box-shadow .6s cubic-bezier(.2,.7,.2,1), filter .6s ease;
+  will-change:transform, opacity;
+  cursor:pointer;
+}
+.atelier-photo:hover{
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 0 0 1px rgba(0,0,0,.05),
+    0 24px 44px -10px rgba(40,28,18,.28),
+    0 8px 18px -6px rgba(40,28,18,.18);
+  filter:brightness(1.04);
+  z-index:10;
+}
+
+/* Four slots — fan-like arrangement on the desk. background-image is set by JS at runtime. */
+.atelier-photo.p1{ /* lands first, upper-left */
+  --rest-x:-26%;  --rest-y:-32%;  --rest-r:-3.4deg;
+  z-index:1;
+}
+.atelier-photo.p2{ /* upper-right, slight overlap */
+  --rest-x:18%;   --rest-y:-22%;  --rest-r:4.2deg;
+  z-index:2;
+}
+.atelier-photo.p3{ /* lower-left */
+  --rest-x:-20%;  --rest-y:14%;   --rest-r:-2.6deg;
+  z-index:3;
+}
+.atelier-photo.p4{ /* lands last, center-right, on top */
+  --rest-x:14%;   --rest-y:24%;   --rest-r:3.6deg;
+  z-index:4;
+}
+
+@media (max-width:1100px){
+  .atelier-photo{ width:60vw; max-width:504px; }
+  .atelier-photo.p1{ --rest-x:-22%; --rest-y:-30%; }
+  .atelier-photo.p2{ --rest-x:14%;  --rest-y:-20%; }
+  .atelier-photo.p3{ --rest-x:-18%; --rest-y:14%;  }
+  .atelier-photo.p4{ --rest-x:12%;  --rest-y:22%;  }
+}
+@media (max-width:680px){
+  .atelier-photo{ width:81.6vw; max-width:384px; }
+  .atelier-photo.p1{ --rest-x:-16%; --rest-y:-32%; --rest-r:-4deg; }
+  .atelier-photo.p2{ --rest-x:14%;  --rest-y:-22%; --rest-r:5deg;  }
+  .atelier-photo.p3{ --rest-x:-14%; --rest-y:14%;  --rest-r:-3deg; }
+  .atelier-photo.p4{ --rest-x:10%;  --rest-y:24%;  --rest-r:4deg;  }
+}
+
+/* ----- Gallery link — fades in after the 4th atelier photo has landed ----- */
+.atelier-gallery-link{
+  position:absolute;
+  left:50%;bottom:10vh;
+  transform:translate(-50%, 14px);
+  z-index:6;
+  display:inline-flex;align-items:center;gap:18px;
+  padding:18px 38px 18px 42px;
+  border:1px solid var(--ink);
+  background:rgba(243,239,231,.78);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  color:var(--ink);
+  font-family:var(--serif-en);
+  font-size:12px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1.2s cubic-bezier(.2,.7,.2,1),
+             transform 1.2s cubic-bezier(.2,.7,.2,1),
+             letter-spacing .55s cubic-bezier(.2,.7,.2,1),
+             color .4s ease,
+             background .4s ease;
+  white-space:nowrap;
+}
+.atelier-gallery-link::before{
+  content:"";position:absolute;inset:0;
+  background:var(--ink);
+  transform:translateY(101%);
+  transition:transform .55s cubic-bezier(.7,0,.2,1);
+  z-index:-1;
+}
+.atelier-gallery-link .lbl-en{position:relative;z-index:1}
+.atelier-gallery-link .lbl-jp{
+  font-family:var(--serif);
+  font-size:11px;
+  letter-spacing:.32em;
+  color:var(--ink-mute);
+  position:relative;z-index:1;
+  transition:color .4s ease;
+}
+.atelier-gallery-link .arrow{
+  position:relative;z-index:1;
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:16px;
+  letter-spacing:0;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.atelier-gallery-link.is-visible{
+  opacity:1;
+  transform:translate(-50%, 0);
+  pointer-events:auto;
+}
+.atelier-gallery-link:hover{
+  color:var(--bg);
+  letter-spacing:.48em;
+  background:transparent;
+}
+.atelier-gallery-link:hover::before{transform:translateY(0)}
+.atelier-gallery-link:hover .lbl-jp{color:var(--bg);opacity:.85}
+.atelier-gallery-link:hover .arrow{transform:translateX(6px)}
+
+@media (max-width:680px){
+  .atelier-gallery-link{
+    bottom:7vh;
+    padding:14px 24px 14px 28px;
+    gap:12px;
+    font-size:11px;
+    letter-spacing:.34em;
+  }
+  .atelier-gallery-link .lbl-jp{display:none}
+}
+
+/* ============ AREA / ACCESS ============ */
+.area{
+  padding:180px 80px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:120px;
+  max-width:1500px;margin:0 auto;
+  align-items:center;
+  position:relative;
+}
+.area::before{
+  content:"";
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  width:1px;height:80px;
+  background:var(--line);
+  animation:lineDrop 1.4s .3s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.area-visual{
+  position:relative;
+  aspect-ratio:4/5;
+  background-image:url("images/area_visual.jpg");
+  background-size:cover;
+  background-position:center;
+  overflow:hidden;
+}
+.area-visual::before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg, rgba(20,14,8,.0) 35%, rgba(20,14,8,.55) 100%);
+}
+.area-visual::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 70%, rgba(220,190,140,.08) 0%, transparent 50%);
+}
+.area-visual .vlabel{
+  position:absolute;
+  bottom:32px;left:32px;
+  color:var(--bg);
+  z-index:2;
+}
+.area-visual .vlabel .small{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:13px;
+  letter-spacing:.4em;
+  opacity:.75;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:12px;
+}
+.area-visual .vlabel .small::before{
+  content:"";width:24px;height:1px;background:currentColor;opacity:.6;
+}
+.area-visual .vlabel .big{
+  font-family:var(--serif);
+  font-size:38px;
+  font-weight:500;
+  letter-spacing:.32em;
+  font-feature-settings:"palt","kern";
+}
+.area-visual .vlabel .tiny{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:11px;
+  letter-spacing:.18em;
+  opacity:.6;
+  margin-top:10px;
+  max-width:280px;
+}
+.area-coords{
+  position:absolute;
+  top:32px;right:32px;
+  writing-mode:vertical-rl;
+  color:var(--bg);
+  font-family:var(--serif-en);
+  font-size:11px;
+  letter-spacing:.45em;
+  opacity:.78;
+  z-index:2;
+  text-shadow:0 1px 8px rgba(0,0,0,.35);
+}
+
+.area-text h2{margin-bottom:44px}
+.area-text p{
+  font-size:15.5px;
+  line-height:2.3;
+  color:var(--ink-soft);
+  max-width:520px;
+  margin-bottom:1.5em;
+  letter-spacing:.07em;
+}
+.area-text p span[style*="--accent"]{
+  font-weight:500;
+  background-image:linear-gradient(transparent 70%, rgba(122,74,38,.08) 70%);
+  padding:0 .06em;
+}
+.access-list{
+  margin-top:56px;
+  border-top:1px solid var(--line);
+}
+.access-list dt, .access-list dd{
+  padding:20px 0;
+  font-size:14px;
+  letter-spacing:.1em;
+  border-bottom:1px solid var(--line);
+  transition:padding-left .5s cubic-bezier(.2,.7,.2,1), color .4s ease;
+}
+.access-list dt:hover, .access-list dt:hover + dd{
+  padding-left:8px;
+  color:var(--accent);
+}
+.access-list{
+  display:grid;
+  grid-template-columns:140px 1fr;
+}
+.access-list dt{
+  font-family:var(--serif-en);
+  font-size:11px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  padding-top:24px;
+}
+.access-list dd{color:var(--ink-soft);line-height:1.85;letter-spacing:.06em}
+
+/* ============ NEWS ============ */
+.news{
+  padding:160px 80px;
+  background:var(--bg-2);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  position:relative;
+}
+.news::before{
+  content:"";
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  width:1px;height:60px;
+  background:var(--line);
+  animation:lineDrop 1.4s .3s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.news-inner{max-width:1500px;margin:0 auto}
+.news-head{
+  display:flex;justify-content:space-between;align-items:end;
+  margin-bottom:60px;
+}
+.news-list{display:flex;flex-direction:column}
+.news-item{
+  display:grid;
+  grid-template-columns:160px 130px 1fr 60px;
+  gap:36px;
+  align-items:center;
+  padding:30px 0;
+  border-top:1px solid var(--line);
+  transition:padding .55s cubic-bezier(.2,.7,.2,1), color .35s ease, background .5s ease;
+  position:relative;
+}
+.news-item::before{
+  content:"";
+  position:absolute;
+  left:0;top:50%;
+  width:0;height:1px;
+  background:var(--accent);
+  transform:translateY(-50%);
+  transition:width .6s cubic-bezier(.2,.7,.2,1);
+}
+.news-list .news-item:last-child{border-bottom:1px solid var(--line)}
+.news-item:hover{padding-left:24px;padding-right:14px;color:var(--accent);background:rgba(255,255,255,.18)}
+.news-item:hover::before{width:14px}
+.news-date{
+  font-family:var(--serif-en);
+  font-size:13px;
+  letter-spacing:.25em;
+  color:var(--ink-mute);
+}
+.news-cat{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:12px;
+  letter-spacing:.32em;
+  text-transform:uppercase;
+  color:var(--accent);
+  border-left:1px solid var(--line);
+  padding-left:20px;
+  display:inline-flex;align-items:center;
+  transition:border-color .4s ease, padding-left .5s cubic-bezier(.2,.7,.2,1);
+}
+.news-item:hover .news-cat{border-color:var(--accent);padding-left:24px}
+.news-title{
+  font-family:var(--serif);
+  font-size:16px;
+  letter-spacing:.08em;
+  line-height:1.7;
+  font-feature-settings:"palt","kern";
+}
+.news-arrow{
+  text-align:right;
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:18px;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1), opacity .4s ease;
+  opacity:.5;
+}
+.news-item:hover .news-arrow{transform:translateX(10px);opacity:1}
+
+.news-more{
+  margin-top:72px;
+  display:flex;justify-content:center;
+}
+.news-more a{
+  font-family:var(--serif-en);
+  font-size:12px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--ink);
+  padding-bottom:8px;
+  transition:padding .5s cubic-bezier(.2,.7,.2,1), letter-spacing .5s cubic-bezier(.2,.7,.2,1), color .35s ease;
+}
+.news-more a:hover{letter-spacing:.52em;padding-bottom:11px;color:var(--accent);border-color:var(--accent)}
+
+/* ============ CTA ============ */
+.cta{
+  padding:200px 80px;
+  text-align:center;
+  position:relative;
+  background:var(--bg);
+}
+.cta::before, .cta::after{
+  content:"";position:absolute;
+  left:50%;
+  width:1px;background:var(--line);
+}
+.cta::before{
+  top:0;height:80px;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  animation:lineDrop 1.4s .2s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.cta::after{
+  bottom:0;height:80px;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:bottom center;
+  animation:lineDrop 1.4s .2s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.cta .section-num{margin-bottom:30px}
+.cta-title{
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:clamp(40px, 5.4vw, 78px);
+  line-height:1.3;
+  letter-spacing:.12em;
+  margin-bottom:48px;
+  font-feature-settings:"palt","kern";
+}
+.cta-title em{
+  font-family:var(--serif-it);
+  font-style:italic;
+  color:var(--accent);
+  font-weight:300;
+  letter-spacing:.04em;
+  padding:0 .04em;
+}
+.cta-jp{
+  font-family:var(--serif);
+  font-size:20px;
+  font-weight:500;
+  letter-spacing:.4em;
+  margin-bottom:64px;
+  color:var(--ink-soft);
+}
+.cta-btn{
+  display:inline-block;
+  padding:24px 68px;
+  border:1px solid var(--ink);
+  font-family:var(--serif-en);
+  font-size:13px;
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+  transition:color .4s, letter-spacing .55s cubic-bezier(.2,.7,.2,1), padding .55s cubic-bezier(.2,.7,.2,1);
+  z-index:1;
+}
+.cta-btn::before{
+  content:"";position:absolute;inset:0;
+  background:var(--ink);
+  transform:translateY(101%);
+  transition:transform .55s cubic-bezier(.7,0,.2,1);
+  z-index:-1;
+}
+.cta-btn:hover{color:var(--bg);letter-spacing:.58em;padding-left:76px;padding-right:76px}
+.cta-btn:hover::before{transform:translateY(0)}
+
+/* ============ FOOTER ============ */
+.footer{
+  background:var(--ink);
+  color:var(--bg);
+  padding:100px 80px 40px;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:80px;
+  max-width:1500px;
+  margin:0 auto 80px;
+}
+.footer-logo{
+  margin-bottom:32px;
+}
+.footer-logo img{
+  height:120px;
+  width:auto;
+  display:block;
+  opacity:.92;
+  transition:opacity .5s ease, transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.footer-logo:hover img{opacity:1;transform:translateY(-2px)}
+.footer-tag em{
+  font-family:var(--serif-it);
+  font-style:italic;
+}
+.footer-tag{
+  font-family:var(--serif-it);
+  font-style:italic;
+  font-size:14px;
+  letter-spacing:.22em;
+  opacity:.75;
+  margin-bottom:36px;
+  line-height:1.8;
+}
+.footer-addr{
+  font-size:13px;
+  line-height:2;
+  opacity:.7;
+  letter-spacing:.1em;
+}
+.footer-col h4{
+  font-family:var(--serif-en);
+  font-size:11px;
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  font-weight:400;
+  margin-bottom:28px;
+  color:var(--accent);
+  opacity:.85;
+  display:flex;align-items:center;gap:12px;
+}
+.footer-col h4::after{
+  content:"";
+  flex:0 0 24px;
+  height:1px;
+  background:currentColor;
+  opacity:.5;
+}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:14px}
+.footer-col a{
+  font-size:13px;
+  letter-spacing:.1em;
+  opacity:.7;
+  transition:opacity .4s ease, padding-left .45s cubic-bezier(.2,.7,.2,1), color .4s ease;
+  position:relative;
+  display:inline-block;
+}
+.footer-col a::before{
+  content:"";
+  position:absolute;
+  left:-14px;top:50%;
+  width:0;height:1px;
+  background:var(--accent);
+  transform:translateY(-50%);
+  transition:width .5s cubic-bezier(.2,.7,.2,1);
+}
+.footer-col a:hover{opacity:1;padding-left:14px}
+.footer-col a:hover::before{width:8px}
+
+.footer-bottom{
+  border-top:1px solid rgba(243,239,231,.15);
+  padding-top:32px;
+  display:flex;justify-content:space-between;
+  font-family:var(--serif-en);
+  font-size:11px;
+  letter-spacing:.36em;
+  opacity:.55;
+  text-transform:uppercase;
+  max-width:1500px;
+  margin:0 auto;
+  transition:opacity .4s ease;
+}
+.footer-bottom:hover{opacity:.8}
+
+/* ============ REVEAL ============ */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 1.2s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+/* Sequential reveals stagger naturally when several reveals share a parent */
+.room-list .reveal:nth-child(1){transition-delay:0s}
+.room-list .reveal:nth-child(2){transition-delay:.08s}
+.room-list .reveal:nth-child(3){transition-delay:.16s}
+.room-list .reveal:nth-child(4){transition-delay:.24s}
+.news-list .reveal:nth-child(1){transition-delay:0s}
+.news-list .reveal:nth-child(2){transition-delay:.07s}
+.news-list .reveal:nth-child(3){transition-delay:.14s}
+.news-list .reveal:nth-child(4){transition-delay:.21s}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .intro::before,.intro-vert::after{animation:none}
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1100px){
+  .header{padding:18px 28px}
+  .header.scrolled{padding:12px 28px}
+  .logo-img{height:54px}
+  .header.scrolled .logo-img{height:46px}
+  .nav{gap:24px;font-size:12px}
+  .hero-content{padding:0 32px 100px}
+  .hero-meta{left:32px;right:32px;bottom:30px}
+  .hero-meta.vert{font-size:28px;letter-spacing:.5em}
+  .intro,.philosophy,.area,.news,.cta{padding-left:32px;padding-right:32px}
+  .intro-grid{grid-template-columns:1fr;gap:60px}
+  .intro-left{position:static}
+  .intro-vert{height:auto;border-right:0;padding-right:0;writing-mode:horizontal-tb;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .intro-vert::after{display:none}
+  /* Rooms (visual book) on tablet — narrower photo + tighter side padding. */
+  .rooms{padding:90px 32px 120px}
+  .rooms-header{margin-bottom:120px}
+  .room-kanji{font-size:40px}
+  .room-label{gap:36px;padding-right:44px}
+  .room-photo{width:260px}
+  .room-info{padding-left:44px}
+  .philosophy{padding-top:120px;padding-bottom:120px}
+  .philosophy-inner{grid-template-columns:1fr}
+  .philosophy-text{padding-right:0;margin-bottom:60px}
+  .philosophy-bg{position:relative;width:100%;height:400px;margin-top:60px}
+  .philosophy-bg-vert{display:none}
+  .area{grid-template-columns:1fr;gap:60px;padding-top:120px;padding-bottom:120px}
+  .access-list{grid-template-columns:120px 1fr}
+  .news-item{grid-template-columns:140px 110px 1fr 40px;gap:24px}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:48px}
+  .footer{padding:80px 32px 32px}
+}
+@media (max-width:680px){
+  .nav{display:none}
+  .header{padding:14px 20px}
+  .header.scrolled{padding:10px 20px}
+  .logo-img{height:42px}
+  .header.scrolled .logo-img{height:36px}
+  .header-right{display:none}     /* lang + reserve move into the mobile menu */
+  .menu-toggle{display:block}
+  .reserve-btn{padding:9px 18px;font-size:11px;letter-spacing:.25em}
+  .reserve-btn:hover{letter-spacing:.3em}
+  .lang{font-size:11px}
+  .hero-content{padding:0 24px 90px}
+  .hero-content .hero-tag{font-size:10px;letter-spacing:.4em;margin-bottom:18px}
+  .hero-content .hero-tag::before{width:24px}
+  .hero-content .kanji-en{font-size:32px;line-height:1.15}
+  .hero-meta{left:24px;right:24px;bottom:24px;font-size:10px;letter-spacing:.3em}
+  .hero-meta.vert{
+    /* On mobile the brass logo sits centered, so move the vertical text to the left
+       to avoid overlapping with it. */
+    left:24px;
+    right:auto;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:22px;
+    letter-spacing:.45em;
+    animation:fadeUpVertLeft 1.6s 1.3s forwards;
+  }
+  @keyframes fadeUpVertLeft{
+    from{opacity:0;transform:translateY(calc(-50% + 24px))}
+    to  {opacity:.92;transform:translateY(-50%)}
+  }
+  /* hero2 (entrance shot) — brass wall logo sits left-of-center & low-of-center in
+     the source photo. Zoom in slightly, then anchor the bottom-left so the logo
+     comes to the viewport center on mobile. */
+  .hero-layer.hero-base{
+    background-size:auto 132%;
+    background-position:44% 100%;
+  }
+  .intro{padding-top:100px;padding-bottom:120px}
+  .intro-slogan{font-size:36px}
+  .intro-jp-title{font-size:18px;letter-spacing:.34em;margin-bottom:36px}
+  .intro-body{font-size:15px;line-height:2.1}
+  /* Rooms (visual book) on mobile — 1カラムに畳む。
+     各 room-row を縦積み: kanji+EN → 写真 → floor+desc */
+  .rooms{padding:64px 20px 96px}
+  .rooms-header{margin-bottom:64px}
+  .rooms-title{font-size:40px;letter-spacing:.06em;margin-bottom:18px}
+  .rooms-subtitle{font-size:13px;letter-spacing:.04em}
+  .room-list{gap:56px}
+  .room-row{
+    grid-template-columns:1fr;
+    justify-items:start;
+    gap:16px;
+    max-width:340px;
+  }
+  .room-label{
+    justify-self:start;
+    padding-right:0;
+    gap:24px;
+    align-items:baseline;
+  }
+  .room-kanji{font-size:34px}
+  .room-en{font-size:12px;letter-spacing:.32em}
+  .room-photo{
+    width:100%;
+    aspect-ratio:3/2;
+  }
+  .room-info{
+    justify-self:start;
+    padding-left:0;
+    gap:8px;
+  }
+  .room-info .floor{font-size:13px}
+  .room-info .desc{font-size:13px;line-height:1.85}
+  .philosophy{padding-top:90px;padding-bottom:90px}
+  .philosophy-quote{font-size:24px}
+  .area{padding-top:90px;padding-bottom:90px}
+  .area-text h2{margin-bottom:30px}
+  .access-list{grid-template-columns:96px 1fr}
+  .access-list dt,.access-list dd{padding:14px 0;font-size:13px}
+  /* Area visual on mobile — taller portrait container with the photo anchored at the
+     TOP and a dark band reserved at the bottom for labels. The photo and the text
+     never share vertical space, so they cannot overlap. */
+  .area-visual{
+    aspect-ratio:4/5;
+    background-color:#15100b;          /* fills the band below the photo */
+    background-size:100% auto;          /* photo fills width, height auto-scales */
+    background-repeat:no-repeat;
+    background-position:center top;     /* anchor photo at the top of the container */
+  }
+  .area-visual::before{
+    background:linear-gradient(180deg,
+      rgba(20,14,8,.0) 0%,
+      rgba(20,14,8,.0) 55%,
+      rgba(20,14,8,.92) 72%,
+      rgba(20,14,8,1)   100%);
+  }
+  .area-visual::after{display:none}     /* drop the warm radial glow on mobile */
+  .area-visual .vlabel{
+    bottom:32px;
+    left:24px;
+    right:24px;
+  }
+  .area-visual .vlabel .small{font-size:11px;letter-spacing:.34em;margin-bottom:8px}
+  .area-visual .vlabel .small::before{width:18px}
+  .area-visual .vlabel .big{font-size:32px;letter-spacing:.28em}
+  .area-visual .vlabel .tiny{
+    display:block;
+    font-size:10.5px;
+    letter-spacing:.16em;
+    line-height:1.65;
+    margin-top:10px;
+    max-width:none;
+    opacity:.7;
+  }
+  .area-coords{display:none}
+  .news{padding:90px 24px}
+  .news-head{margin-bottom:36px}
+  .news-item{grid-template-columns:1fr;gap:8px;padding:22px 0}
+  .news-item:hover{padding-left:10px}
+  .news-cat{border-left:0;padding-left:0;justify-self:start}
+  .news-arrow{display:none}
+  .cta{padding:120px 24px}
+  .cta-title{font-size:34px;letter-spacing:.08em}
+  .cta-btn{padding:18px 40px;font-size:11px;letter-spacing:.4em}
+  .cta-btn:hover{letter-spacing:.46em;padding-left:48px;padding-right:48px}
+  .footer{padding:64px 24px 28px}
+  .footer-grid{grid-template-columns:1fr;gap:40px;margin-bottom:48px}
+  .footer-logo img{height:96px}
+  .footer-bottom{flex-direction:column;gap:14px;text-align:center;justify-content:center}
+}
+
+/* ============ GOTHIC TYPOGRAPHY OVERRIDES ============
+   ゴシック化に伴う微調整。和文italicは不自然なので weight + accent 色に置換。 */
+
+/* 和文 em (「開く」など) — italicを解除して weight + 色アクセントで強調 */
+.philosophy-quote em,
+.cta-title em{
+  font-style:normal;
+  font-weight:500;
+  color:var(--accent);
+}
+
+/* footer-tag の英日混在表記 — italic は解除 */
+.footer-tag,
+.footer-tag em{
+  font-style:normal;
+  letter-spacing:.14em;
+}
+
+/* 全体のletter-spacingをゴシック向けにやや締める。
+   ゴシックはMinchoより字面が大きく、同じspacingだと開きすぎに見える。 */
+body{
+  letter-spacing:.02em;
+  line-height:1.8;
+}
+.intro-body,
+.philosophy-body,
+.rooms-header .right p,
+.area-text p,
+.room-info .desc{letter-spacing:.04em}
+
+/* 見出しのweightをゴシック向けに調整 */
+.h-display{font-weight:700;letter-spacing:.04em}
+.intro-slogan{font-weight:500;letter-spacing:0}
+.philosophy-quote{font-weight:500;letter-spacing:.05em}
+.cta-title{font-weight:500;letter-spacing:.06em}
+.room-kanji{font-weight:500}
+.intro-jp-title{font-weight:500;letter-spacing:.24em}
+
+
+/* ============ TITLEPAGE — ヒーロー直下の表紙ページ ============
+   visual book の中扉。左にロゴ、右に英文スローガン + OTAコピー。
+   背景は完全な白。色は accent (warm brown) で統一。 */
+.titlepage{
+  background:#ffffff;
+  padding:300px 80px 200px;
+  position:relative;
+}
+/* 見本どおり: ロゴ(左)+テキスト(右)の2カラムを、ブロックごとページ中央に。 */
+.titlepage-inner{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:96px;
+}
+/* ロゴは accent 色で着色済みの PNG を通常の <img> で表示（mask方式は不安定だったため廃止）。
+   global img{max-width:100%} と親 width:fit-content が循環して幅0に潰れるため
+   max-width:none で固定幅を死守（header .logo-img と同じ対処）。 */
+.titlepage-logo{
+  flex-shrink:0;
+  width:165px;
+  max-width:none;
+  height:auto;
+  display:block;
+}
+/* テキスト列: スローガン画像 + 開土KAIDO誕生 を左揃えで縦並び */
+.titlepage-text{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:44px;
+}
+.titlepage-headline{
+  margin:0;
+  line-height:1;
+}
+.titlepage-headline img{
+  display:block;
+  width:clamp(280px, 30vw, 420px);
+  height:auto;
+}
+.titlepage-jp{ line-height:1; }
+.titlepage-jp img{
+  display:block;
+  width:clamp(220px, 24vw, 330px);
+  max-width:none;
+  height:auto;
+}
+@media (max-width:1100px){
+  .titlepage{padding:200px 32px 130px}
+  .titlepage-inner{gap:64px}
+  .titlepage-logo{width:160px}
+  .titlepage-text{gap:40px}
+}
+@media (max-width:680px){
+  /* スマホは縦積み中央寄せ（横並びは窮屈なため） */
+  .titlepage{padding:140px 24px 90px}
+  .titlepage-inner{flex-direction:column;gap:44px}
+  .titlepage-logo{width:130px}
+  .titlepage-text{align-items:center;text-align:center;gap:32px}
+  .titlepage-headline img{width:min(78vw,380px)}
+  .titlepage-jp img{width:min(62vw,300px)}
+}
+
+
+/* ============ ENGLISH THIN-GOTHIC — visual book direction ============
+   英字のみのところは細身ゴシック(Inter Light 300)で統一。
+   参考画像の SORA / KI / ISHI / TSUCHI のような繊細な見た目を全英字に適用。 */
+
+/* nav / lang / reserve */
+.nav a{font-weight:300}
+.reserve-btn{font-weight:300}
+.lang,
+.lang span{font-weight:300}
+.lang span.active{font-weight:400}
+
+/* hero / titlepage */
+.scroll-indicator{font-weight:300}
+.hero-meta{font-weight:300}
+.titlepage-headline{font-weight:300}
+.titlepage-tag{font-weight:400}
+
+/* section numbers + intro */
+.section-num{font-weight:300}
+.intro-slogan{font-weight:300}
+.intro-slogan .it{font-weight:300}
+
+/* rooms (visual-book layout) */
+.room-info .floor{font-weight:300}
+.room-en{font-weight:300}
+
+/* area / access */
+.area-coords{font-weight:300}
+.access-list dt{font-weight:300}
+
+/* news */
+.news-date{font-weight:300}
+.news-cat{font-weight:300}
+.news-arrow{font-weight:300}
+.news-more a{font-weight:300}
+
+/* cta */
+.cta-btn{font-weight:300}
+
+/* footer */
+.footer-col h4{font-weight:300}
+.footer-tag,
+.footer-tag em{font-weight:300}
+.footer-col a{font-weight:300}
+.footer-bottom{font-weight:300}
+
+/* atelier */
+.atelier-intro .num{font-weight:300}
+
+/* Mobile menu — メニュー項目も Inter Light で細身に。日本語Sansから切替。 */
+.mobile-menu-list a{
+  font-family:var(--serif-en);
+  font-weight:300;
+  text-transform:uppercase;
+  letter-spacing:.32em;
+}
+.mobile-menu .lang,
+.mobile-menu .lang span{font-weight:300}
+.mobile-menu .lang span.active{font-weight:400}
+.mobile-menu .reserve-btn{font-weight:300}
+
+
+/* ============ PHOTO GALLERY (旧 Philosophy 以降の置換) ============
+   旧スライドショー7枚を、トリミングせず1枚ずつ縦に並べる。
+   各画像 幅80% / 自然なアスペクト比 / 間隔は広め。 */
+.photo-gallery{
+  background:#ffffff;
+  padding:160px 0 200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:200px;                 /* 1枚ずつの間隔を広めに */
+}
+.photo-gallery .pg-item{
+  margin:0;
+  width:80%;                 /* 画面全体の約80% */
+  max-width:1200px;
+}
+.photo-gallery .pg-item img{
+  display:block;
+  width:100%;
+  height:auto;               /* トリミングしない=全体表示・自然なアスペクト比 */
+}
+@media (max-width:680px){
+  .photo-gallery{padding:80px 0 110px;gap:110px}
+  .photo-gallery .pg-item{width:88%}
+}
+
+/* ============ CONCEPT — 写真展のように。作り込まず、余白で見せる ============
+   1点ずつ大きく、たっぷりの余白、placard 的な短い言葉のみ。 */
+/* ヘッダーのメニューは通常表示に戻す（デスクトップ=ナビ、モバイル=ハンバーガー）。
+   The Row 化で常時非表示にしていた指定は解除。 */
+
+.concept{ background:#fff; padding:300px 0 220px; }
+.concept-opener{
+  margin:0 auto 420px; padding:0 40px; text-align:center;
+}
+.concept-essence{
+  font-family:var(--serif); font-weight:500;
+  font-size:clamp(30px,4.4vw,58px); letter-spacing:.2em;
+  color:var(--accent); line-height:1.7; margin:0;
+}
+/* 1点 = 1作品。大判写真 + 美術館の placard のような小さな言葉。 */
+.concept-plate{
+  margin:0 auto 360px; max-width:1280px; padding:0 24px;
+}
+.concept-photo{
+  width:100%; aspect-ratio:3/2;
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+}
+/* The Row 化: キャプション文字は廃止（写真のみ） */
+.concept-plate figcaption{ display:none; }
+.concept-bridge{ text-align:center; padding:120px 40px 40px; }
+.concept-bridge-link,
+.access-reserve-link{
+  display:inline-flex; flex-direction:column; gap:14px; align-items:center;
+}
+.concept-bridge-jp{
+  font-family:var(--serif); font-weight:500;
+  font-size:clamp(22px,2.8vw,34px); letter-spacing:.2em; color:var(--accent);
+}
+.concept-bridge-en{
+  font-family:var(--serif-en); font-weight:300; font-size:13px;
+  letter-spacing:.32em; color:var(--ink-mute);
+  transition:letter-spacing .55s cubic-bezier(.2,.7,.2,1);
+}
+.concept-bridge-link:hover .concept-bridge-en,
+.access-reserve-link:hover .concept-bridge-en{ letter-spacing:.46em; }
+
+/* ============ GALLERY (page) ============ */
+.photo-gallery--page{ padding-top:160px; }
+.gallery-head{ text-align:center; margin-bottom:120px; }
+
+/* ============ ACCESS / STAY (page) ============ */
+.access-page{ background:#fff; padding:200px 40px 160px; max-width:1100px; margin:0 auto; }
+.access-head{ text-align:center; margin-bottom:120px; }
+.access-title{
+  font-family:var(--serif); font-weight:500;
+  font-size:clamp(30px,4vw,52px); letter-spacing:.12em;
+  color:var(--accent); line-height:1.5; margin:0 0 40px;
+}
+.access-lead{
+  font-family:var(--serif); font-size:15px; line-height:2.3;
+  color:var(--ink-soft); letter-spacing:.06em; max-width:560px; margin:0 auto;
+}
+.access-visual{ margin:0 0 120px; }
+.access-visual img{ display:block; width:100%; height:auto; }
+.access-dl{ max-width:680px; margin:0 auto 140px; }
+.access-dl > div{
+  display:grid; grid-template-columns:160px 1fr; gap:40px;
+  padding:28px 0; border-bottom:1px solid var(--line);
+}
+.access-dl dt{
+  font-family:var(--serif-en); font-weight:300; font-size:13px;
+  letter-spacing:.3em; text-transform:uppercase; color:var(--accent);
+}
+.access-dl dd{
+  font-family:var(--serif); font-size:15px; line-height:2;
+  color:var(--ink-soft); margin:0;
+}
+.access-reserve{ text-align:center; padding-top:40px; }
+
+@media (max-width:900px){
+  .concept{ padding:150px 0 100px; }
+  .concept-opener{ margin-bottom:180px; padding:0 28px; }
+  .concept-plate{ margin-bottom:160px; padding:0 24px; }
+  .concept-photo{ aspect-ratio:4/3; }
+  .concept-plate figcaption{ margin-top:28px; font-size:12px; letter-spacing:.26em; }
+  .concept-bridge{ padding:70px 24px 20px; }
+  .photo-gallery--page{ padding-top:110px; }
+  .gallery-head{ margin-bottom:70px; }
+  .access-page{ padding:120px 24px 100px; }
+  .access-head{ margin-bottom:70px; }
+  .access-visual{ margin-bottom:70px; }
+  .access-dl > div{ grid-template-columns:1fr; gap:8px; padding:22px 0; }
+  .access-dl{ margin-bottom:80px; }
+}
+
+/* =======================================================================
+   260518 PDF SPEC — マルーン額装 / 写真展 / Zen Kaku Gothic New Bold 統一
+   (末尾追記＝最優先で旧ルールを上書き)
+   ======================================================================= */
+:root{ --maroon:#904848; --cream:#f3efe7; }
+*{ font-family:var(--serif) !important; }
+body{
+  background:#fff; color:var(--maroon);
+  font-family:var(--serif); font-weight:700;
+  letter-spacing:.04em; line-height:1.9;
+}
+body::before{ display:none; }
+img{ max-width:100%; height:auto; }
+
+/* ---- HEADER : maroon 固定 / 6ナビ等分 ---- */
+.header, .header.on-hero, .header.scrolled{
+  position:fixed; inset:0 0 auto 0; z-index:100;
+  display:flex; align-items:center;
+  gap:40px;
+  background:var(--maroon) !important;
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+  border:0; border-bottom:1px solid rgba(0,0,0,.32); box-shadow:none;
+  padding:0 44px; height:78px;
+}
+/* PDF準拠: ヘッダーの文字・ロゴ・RESERVEは黒（マルーン地に黒） */
+.header .logo{ flex:0 0 auto; }
+.header .logo-img{
+  height:34px; width:auto; max-width:none;
+  filter:brightness(0) !important; opacity:.92;   /* 白PNG→黒 */
+}
+.header .nav{
+  flex:1 1 auto;
+  display:flex; justify-content:space-evenly; align-items:center;
+  gap:0;
+}
+.header .nav a{
+  color:#1a1a1a; font-weight:700;
+  font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  opacity:.85; padding:6px 0;
+}
+.header .nav a:hover, .header .nav a[aria-current="page"]{ opacity:1; }
+.header .nav a::after{ display:none; }
+.header-right{ flex:0 0 auto; display:flex; align-items:center; gap:22px; }
+.header .lang{ color:#1a1a1a; font-size:12px; letter-spacing:.2em; display:flex; gap:8px; opacity:.85; }
+.header .lang .active{ font-weight:700; }
+.header .lang .divider{ opacity:.5; }
+.header .reserve-btn{
+  color:#1a1a1a; border:1px solid #1a1a1a;
+  background:transparent;
+  font-size:12px; letter-spacing:.22em; font-weight:700;
+  padding:11px 26px; text-transform:uppercase;
+}
+.header .reserve-btn::before{ display:none; }
+.header .reserve-btn:hover{ background:#1a1a1a; color:var(--maroon); }
+.menu-toggle span{ background:#1a1a1a; }
+
+/* ---- HERO : 元の2段スクロール演出を維持（上画像が1/3に減って上へ）。
+   地色のみマルーンに。額装余白は上下左右にマルーンを覗かせる。 ---- */
+.hero{ background:var(--maroon); }
+.hero-stage{ background:var(--maroon); }
+.hero-layer.hero-front{
+  background-size:cover; background-position:center 45%;
+}
+/* 後ろ(エントランス)画像の size/position は JS が座標ロジックで毎回設定（CSSは初期値のみ） */
+.hero-layer.hero-base{
+  background-size:cover; background-position:center 56%;
+}
+.hero-vignette{ background:linear-gradient(180deg, rgba(60,20,20,.12), rgba(60,20,20,.30)); }
+.scroll-indicator{ color:var(--cream); letter-spacing:.36em; font-size:11px; }
+.scroll-indicator .line{ background:rgba(243,239,231,.6); }
+
+/* ---- TITLEPAGE : 白。ロゴ左/コピー右の塊を中央、縦書きはその下に中央 ---- */
+.titlepage{
+  background:#fff; padding:220px 80px 100px;
+  display:flex; flex-direction:column; align-items:center;
+}
+.titlepage-inner{
+  max-width:1180px; margin:0 auto;
+  display:flex; flex-direction:row; align-items:center; justify-content:center; gap:110px;
+}
+.titlepage-logo{ flex:0 0 auto; width:175px; max-width:none; height:auto; display:block; }
+.titlepage-text{ display:flex; flex-direction:column; align-items:flex-start; gap:48px; }
+.titlepage-headline img{ width:clamp(300px,32vw,470px); height:auto; display:block; }
+.titlepage-jp img{ width:clamp(230px,25vw,360px); max-width:none; height:auto; display:block; }
+.titlepage-vertical{
+  margin-top:300px;   /* 下の余白 = padding-bottom100 + philosophy padding-top200 = 300 と均等化 */
+  display:flex; flex-direction:column; align-items:center; gap:26px;
+}
+.titlepage-vertical .tv-text{
+  writing-mode:vertical-rl; color:var(--maroon);
+  font-weight:700; font-size:20px; letter-spacing:.45em;   /* .rooms-subtitle と同サイズ */
+  /* 縦書きletter-spacingで文末(下)に余白が付き上寄りに見えるため、
+     レイアウト(マージン総量)は変えず文字だけ下へ移動して上下を均等化 */
+  transform:translateY(.225em);
+}
+.titlepage-vertical .tv-cue{
+  width:1px; height:64px; background:var(--maroon); opacity:.45;
+}
+
+/* ---- PHILOSOPHY / GALLERY : 写真展。大判中央・大余白 ---- */
+.philosophy, .photo-gallery{
+  background:#fff; padding:200px 0 200px;
+  display:flex; flex-direction:column; align-items:center; gap:220px;
+}
+.philosophy::before, .concept::before{ display:none; }
+.ph-plate{ margin:0; width:62%; max-width:1100px; }
+.ph-photo{ width:100%; aspect-ratio:3/2;
+  background-size:cover; background-position:center; background-repeat:no-repeat; }
+
+/* ---- ROOMS : 左揃え見出し / [漢字 | 情報 | 写真右] / 写真は縦に連続 ---- */
+.rooms{ background:#fff; padding:160px 80px 180px; }
+.rooms-header{ text-align:left; max-width:1180px; margin:0 auto 120px; }
+.rooms-title{
+  margin:0 0 20px; color:var(--maroon);
+  font-family:var(--serif); font-weight:700;
+  font-size:clamp(40px,4.4vw,64px); letter-spacing:.06em;
+  line-height:1; text-align:left;
+}
+.rooms-subtitle{
+  color:var(--maroon); font-weight:700; font-size:20px;   /* +4pt */
+  letter-spacing:.08em; margin:0;
+}
+.rooms .room-list{
+  max-width:1180px; margin:0 auto;
+  display:flex; flex-direction:column; gap:0;
+}
+.rooms .room-row{
+  display:grid;
+  grid-template-columns:140px 1fr 460px;
+  align-items:center; gap:48px;
+  padding:0;
+}
+.rooms .room-kanji{
+  font-size:54px; font-weight:700; color:var(--maroon);
+  line-height:1; text-align:center;
+}
+.rooms .room-info{ display:flex; flex-direction:column; gap:14px; }
+.rooms .room-meta{
+  color:var(--maroon); font-weight:700; font-size:17px; letter-spacing:.16em;  /* +2pt(全4室) */
+}
+.rooms .room-desc{
+  color:var(--maroon); font-weight:700; font-size:17px;                        /* +2pt(全4室) */
+  line-height:2; letter-spacing:.05em; margin:0;
+}
+.rooms .room-photo{
+  width:460px; aspect-ratio:519 / 379;   /* 見本の room写真と同比率(≒1.37) */
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+}
+.rooms-reserve{ text-align:center; margin-top:180px; }  /* 下(rooms padding-bottom 180)と上下均等 */
+.reserve-btn--solid{
+  display:inline-block; background:var(--maroon); color:var(--cream);
+  border:0; padding:18px 56px; font-weight:700;
+  font-size:13px; letter-spacing:.28em; text-transform:uppercase;
+}
+.reserve-btn--solid::before{ display:none; }
+.reserve-btn--solid:hover{ opacity:.88; }
+
+/* ---- FOOTER : maroon 地 / 文字・ロゴ黒 / 線なし / 詰め ---- */
+.footer{
+  background:var(--maroon); color:#1a1a1a;
+  padding:96px 80px 56px;
+}
+.footer-grid{
+  max-width:1180px; margin:0 auto;
+  display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:48px;
+  align-items:start; padding-bottom:56px;
+}
+.footer-logo img{
+  width:140px; height:auto;
+  filter:brightness(0) saturate(100%); opacity:.9;   /* 白PNG→黒（PDF準拠） */
+}
+.footer-col h4{
+  color:#1a1a1a; font-weight:700; font-size:13px;
+  letter-spacing:.22em; margin:0 0 16px; opacity:.85; text-align:center;
+}
+.footer-col ul{ list-style:none; margin:0; padding:0; text-align:center;
+  display:flex; flex-direction:column; gap:4px; }      /* 改行さらに詰め */
+.footer-col a{
+  color:#1a1a1a; font-weight:700; font-size:15px;       /* +2pt・黒 */
+  letter-spacing:.12em; opacity:.9;
+}
+.footer-col a:hover{ opacity:1; }
+.footer-bottom{
+  max-width:1180px; margin:0 auto;
+  border:0;                                              /* 余計な線を削除 */
+  display:flex; justify-content:space-between; gap:24px;
+  padding:0;
+  color:#1a1a1a; font-size:13px; letter-spacing:.05em; opacity:.85;
+}
+
+/* ---- ACCESS ---- */
+.access-page{ background:#fff; padding:200px 80px 160px; max-width:1100px; margin:0 auto; }
+.access-visual{ margin:0 0 120px; }
+.access-visual img{ display:block; width:100%; height:auto; }
+.access-dl{ max-width:720px; margin:0 auto 120px; }
+.access-dl > div{ display:grid; grid-template-columns:160px 1fr; gap:36px;
+  padding:26px 0; border-bottom:1px solid rgba(144,72,72,.25); }
+.access-dl dt{ color:var(--maroon); font-weight:700; font-size:13px; letter-spacing:.24em; }
+.access-dl dd{ color:var(--maroon); font-weight:700; font-size:15px; margin:0; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width:1024px){
+  .header .nav{ display:none; }
+  .menu-toggle{ display:block; }
+  .header-right{ display:none; }
+  .titlepage-inner{ flex-direction:column; gap:48px; }
+  .titlepage-vertical{ display:none; }
+  .ph-plate{ width:82%; }
+  .rooms .room-row{ grid-template-columns:90px 1fr 300px; gap:28px; }
+  .rooms .room-photo{ width:300px; }
+}
+@media (max-width:680px){
+  .header{ padding:0 20px; height:64px; }
+  .header .logo-img{ height:26px; }
+  .titlepage{ padding:140px 24px 110px; }
+  .titlepage-headline img{ width:min(78vw,360px); }
+  .titlepage-jp img{ width:min(62vw,280px); }
+  .philosophy,.photo-gallery{ padding:110px 0; gap:120px; }
+  .ph-plate{ width:88%; }
+  .rooms{ padding:90px 24px 110px; }
+  .rooms-header{ margin-bottom:64px; }
+  .rooms .room-row{
+    grid-template-columns:1fr; gap:14px; justify-items:start;
+    margin-bottom:72px;
+  }
+  .rooms .room-kanji{ text-align:left; font-size:40px; }
+  .rooms .room-photo{ width:100%; }
+  .rooms-reserve{ margin-top:110px; }   /* SP: rooms padding-bottom 110 と均等 */
+  .footer{ padding:80px 24px 0; }
+  .footer-grid{ grid-template-columns:1fr; gap:48px; text-align:center; justify-items:center; padding-bottom:56px; }
+  .footer-bottom{ flex-direction:column; gap:12px; text-align:center; align-items:center; }
+  .access-page{ padding:120px 24px 100px; }
+  .access-dl > div{ grid-template-columns:1fr; gap:6px; }
+}
+
+/* === 260519 追補: 文字+2pt / ヘッダー罫線 / cue削除 === */
+body{ font-size:17px; }                                  /* 全体 +約2pt */
+.header{ border-bottom:1px solid rgba(0,0,0,.28); }      /* ヘッダー下に罫線1本 */
+.header .nav a{ font-size:15px; }                        /* メニュー +2pt(黒は既存) */
+.header .reserve-btn{ font-size:14px; }
+.titlepage-vertical .tv-cue{ display:none !important; }  /* 「あなたを開く」下のライン削除 */
+
+/* === 260519-2: ヘッダー常時黒 / ヒーロー額装(めくれ演出は維持) === */
+/* 最上部(on-hero時)も白にせず黒で固定 */
+.header.on-hero, .header.scrolled,
+.header.on-hero .nav a, .header.scrolled .nav a,
+.header.on-hero .lang, .header.on-hero .reserve-btn{
+  color:#1a1a1a !important;
+}
+.header.on-hero .reserve-btn{ border-color:#1a1a1a !important; }
+.header .logo-img, .header.on-hero .logo-img, .header.scrolled .logo-img{
+  filter:brightness(0) !important; opacity:.92 !important;
+}
+.menu-toggle span{ background:#1a1a1a !important; }
+
+/* ヒーロー: マルーン額装の中で 2段クリップ(めくれ)演出を維持。
+   stageの地色マルーンを縁として覗かせ、画像レイヤーを内側にインセット。 */
+.hero-stage{ background:var(--maroon) !important; }
+.hero-layer, .hero-vignette{
+  inset:118px 5vw 84px !important;   /* 上=ヘッダー回避+額/左右5%/下=額 */
+}
+.hero-overlay{ inset:118px 5vw 84px !important; }
+
+/* === 260519-3: フッターの不要な横線を完全除去 === */
+/* EXPLORE / INFORMATION / CONNECT 見出し横の装飾線を削除 */
+.footer-col h4{ display:block !important; }
+.footer-col h4::after, .footer-col h4::before{ display:none !important; content:none !important; }
+/* 住所(footer-bottom)上に区切り線を1本 */
+.footer-bottom{
+  border:0 !important;
+  border-top:1px solid rgba(0,0,0,.18) !important;
+  padding-top:32px !important;
+}

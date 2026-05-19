@@ -1,0 +1,58 @@
+[
+  {
+    "floor": 4,
+    "kanji": "宙",
+    "kanjiReading": "そら",
+    "en": "Sora",
+    "tagline": "the sky that holds your breath",
+    "description": "最上階。高さは、それだけで一つの贅沢になる。札幌の街明かりと、その向こうの夜空を独り占めする邸宅。「宙」は、開拓の果てに辿り着く、無限の余白です。",
+    "area": "96m²",
+    "guests": 4,
+    "sauna": "Rooftop Sauna",
+    "themeColor": "#1c2230",
+    "image": "assets/images/room_04_sora.jpg",
+    "displayOrder": 1
+  },
+  {
+    "floor": 3,
+    "kanji": "木",
+    "kanjiReading": "き",
+    "en": "Ki",
+    "tagline": "the warmth of living timber",
+    "description": "北海道の森が呼吸している。無垢材の床に裸足を預け、木目に光が滲む朝を迎える。やわらかな時間が流れる「木」は、\"暮らすように\" の本意を最も強く感じられる一邸。",
+    "area": "82m²",
+    "guests": 2,
+    "sauna": "Private Sauna",
+    "themeColor": "#5a4a2e",
+    "image": "assets/images/room_03_ki.jpg",
+    "displayOrder": 2
+  },
+  {
+    "floor": 2,
+    "kanji": "石",
+    "kanjiReading": "いし",
+    "en": "Ishi",
+    "tagline": "silence carved into stone",
+    "description": "時を経た岩のように、揺るがぬ落ち着き。重厚な石材と陰影が織りなす空間で、思考は深く、呼吸はゆっくりと長くなる。「石」は、静寂を所有する者のための部屋です。",
+    "area": "78m²",
+    "guests": 2,
+    "sauna": "Private Sauna",
+    "themeColor": "#3a3a32",
+    "image": "assets/images/room_02_ishi.jpg",
+    "displayOrder": 3
+  },
+  {
+    "floor": 1,
+    "kanji": "土",
+    "kanjiReading": "つち",
+    "en": "Tsuchi",
+    "tagline": "the soil that begins everything",
+    "description": "開拓の起点。大地から立ちのぼる温もりと、土壁が抱く深い静けさ。素足で歩きたくなる土間と、火を囲む夜のためのリビング。この建築のすべてが、ここ「土」から始まります。",
+    "area": "72m²",
+    "guests": 2,
+    "sauna": "Private Sauna",
+    "themeColor": "#7a4a26",
+    "image": "assets/images/room_01_tsuchi.jpg",
+    "displayOrder": 4
+  }
+]
