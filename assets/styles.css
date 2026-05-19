@@ -2302,3 +2302,40 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   border-top:1px solid rgba(0,0,0,.18) !important;
   padding-top:32px !important;
 }
+
+/* === 260519-m: CONCEPT ページ（既存 .concept-* トンマナ継承） === */
+/* テキストブロック：The Row 的に中央・大余白・maroon見出し＋黒本文 */
+.concept-lead{
+  max-width:680px; margin:0 auto 360px; padding:0 28px; text-align:center;
+}
+.concept-label{
+  font-family:var(--serif); font-weight:700;
+  font-size:14px; letter-spacing:.34em; color:var(--accent);
+  margin:0 0 44px;
+}
+.concept-lead-jp{
+  font-family:var(--serif); font-weight:700;
+  font-size:clamp(20px,2.2vw,28px); letter-spacing:.16em;
+  line-height:2; color:var(--accent); margin:0 0 36px;
+}
+.concept-lead-body{
+  font-family:var(--serif); font-weight:400;
+  font-size:16px; letter-spacing:.12em; line-height:2.4;
+  color:var(--ink); margin:0;
+}
+/* 縦位置の写真（1点）はエディトリアルに縦長で */
+.concept-plate--tall{ max-width:760px; }
+.concept-plate--tall .concept-photo{ aspect-ratio:3/4; }
+
+@media (max-width:680px){
+  .concept{ padding:150px 0 130px !important; }
+  .concept-opener{ margin:0 auto 180px; }
+  .concept-essence{ font-size:clamp(26px,8.4vw,38px); letter-spacing:.16em; }
+  .concept-plate{ margin:0 auto 150px; padding:0 20px; }
+  .concept-plate--tall .concept-photo{ aspect-ratio:3/4; }
+  .concept-lead{ margin:0 auto 150px; padding:0 24px; }
+  .concept-label{ margin:0 0 28px; letter-spacing:.28em; }
+  .concept-lead-jp{ line-height:1.9; margin:0 0 28px; }
+  .concept-lead-body{ font-size:15px; line-height:2.2; }
+  .concept-bridge{ padding:80px 24px 20px; }
+}
