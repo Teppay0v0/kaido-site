@@ -2342,14 +2342,16 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 
 /* === 260519-n: TOP デッキ（スクロール固定めくれ）＋ NEWS / ACCESS === */
 /* hero と同じ「sticky stage + scroll進捗」方式。JS(updateDeck)が clip-path を駆動 */
-.deck{ position:relative; background:#fff; }
+/* 6スライド：1枚=100vhのスクロールでめくれる → 高さ = 6*100vh。
+   sticky stage(100vh)のスクロール余地 = 600vh-100vh = 500vh = 5回のpeel */
+.deck{ position:relative; height:600vh; background:#fff; }
 .deck-stage{
   position:sticky; top:0; height:100vh; overflow:hidden; background:#fff;
 }
 .deck-slide{
   position:absolute; inset:0;
   display:flex; align-items:center; justify-content:center;
-  background:#fff; overflow:hidden;
+  background-color:#fff; overflow:hidden;
   will-change:clip-path,transform,opacity; backface-visibility:hidden;
 }
 .deck-slide.deck-photo{
