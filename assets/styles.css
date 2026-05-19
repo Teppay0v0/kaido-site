@@ -2415,3 +2415,33 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   .access-home{ padding:30px 24px 110px; }
   .access-home-visual{ margin:0 auto 64px; }
 }
+
+/* === 260520: ACCESS — 左マップ／右情報 + カスタムSVG === */
+.access-home-grid{
+  display:grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap:72px;
+  max-width:1280px; margin:0 auto;
+  align-items:start;
+}
+.access-home-map{ margin:0; }
+.access-home-map img{
+  display:block; width:100%; height:auto;
+  border:1px solid rgba(144,72,72,.18);
+  background:#fbf9f4;
+}
+.access-home-info{ padding-top:6px; }
+/* グリッド内では dl の固定幅・中央寄せを解除し、列幅いっぱいに */
+.access-home .access-dl,
+.access-page .access-dl{ max-width:none !important; margin:0 !important; }
+/* access.html: rooms-header対応 + 横幅を grid に合わせ拡張 */
+.access-page{ max-width:1280px !important; padding:200px 80px 160px !important; }
+.access-page .rooms-header{ text-align:left; max-width:1180px; margin:0 auto 80px; }
+
+@media (max-width:900px){
+  .access-home-grid{ grid-template-columns:1fr; gap:40px; }
+  .access-home-info{ padding-top:0; }
+}
+@media (max-width:680px){
+  .access-page{ padding:120px 24px 100px !important; }
+}

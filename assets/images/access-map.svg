@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="開土 KAIDO アクセスマップ">
+  <defs>
+    <style>
+      .bg{ fill:#fbf9f4; }
+      .frame{ fill:none; stroke:rgba(144,72,72,.18); stroke-width:1; }
+      .street-minor{ stroke:rgba(34,34,34,.16); stroke-width:1; fill:none; }
+      .street-major{ stroke:rgba(34,34,34,.36); stroke-width:1.8; fill:none; }
+      .label-st { fill:rgba(34,34,34,.45); font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif; font-size:10px; font-weight:500; letter-spacing:.16em; }
+      .label-place{ fill:#904848; font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:.22em; }
+      .label-en{ fill:rgba(144,72,72,.62); font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif; font-size:9px; font-weight:500; letter-spacing:.34em; }
+      .label-tiny{ fill:rgba(34,34,34,.4); font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif; font-size:9px; font-weight:500; letter-spacing:.18em; }
+      .marker-pin{ fill:#904848; }
+      .marker-ring{ fill:none; stroke:#904848; stroke-width:1.2; opacity:.35; }
+      .station-fill{ fill:rgba(144,72,72,.05); stroke:rgba(144,72,72,.42); stroke-width:1; }
+      .park-fill{ fill:rgba(144,72,72,.03); stroke:rgba(144,72,72,.22); stroke-width:.8; }
+      .route{ stroke:#904848; stroke-width:1.2; stroke-dasharray:2 5; fill:none; opacity:.55; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <!-- canvas -->
+  <rect class="bg" x="0" y="0" width="800" height="600"/>
+  <rect class="frame" x="0.5" y="0.5" width="799" height="599"/>
+
+  <!-- ===== Streets grid =====
+       縦線=南北の通り(西N丁目)。西10(左)→西3(右) ※実地理: 西側ほど数値大
+       横線=東西の通り(北N条)。北10(上)→北4(下)                       -->
+
+  <!-- Avenues (N-S) -->
+  <line class="street-minor" x1="80"  y1="24" x2="80"  y2="576"/>
+  <line class="street-minor" x1="180" y1="24" x2="180" y2="576"/>
+  <line class="street-minor" x1="280" y1="24" x2="280" y2="576"/>
+  <line class="street-minor" x1="380" y1="24" x2="380" y2="576"/>  <!-- 西7丁目 -->
+  <line class="street-minor" x1="480" y1="24" x2="480" y2="576"/>
+  <line class="street-minor" x1="580" y1="24" x2="580" y2="576"/>
+  <line class="street-major" x1="680" y1="24" x2="680" y2="576"/>  <!-- 駅前通(西4) -->
+  <line class="street-minor" x1="760" y1="24" x2="760" y2="576"/>
+
+  <!-- Streets (E-W) -->
+  <line class="street-minor" x1="24" y1="60"  x2="776" y2="60"/>   <!-- 北10条 -->
+  <line class="street-minor" x1="24" y1="140" x2="776" y2="140"/>  <!-- 北9条 -->
+  <line class="street-minor" x1="24" y1="220" x2="776" y2="220"/>  <!-- 北8条 -->
+  <line class="street-major" x1="24" y1="300" x2="776" y2="300"/>  <!-- 北7条通 -->
+  <line class="street-minor" x1="24" y1="380" x2="776" y2="380"/>  <!-- 北6条 -->
+  <line class="street-major" x1="24" y1="460" x2="776" y2="460"/>  <!-- 北5条手稲通 -->
+  <line class="street-minor" x1="24" y1="540" x2="776" y2="540"/>  <!-- 北4条 -->
+
+  <!-- JR札幌駅 (北5-6条 × 西3-4丁目) -->
+  <rect class="station-fill" x="600" y="380" width="160" height="80" rx="2"/>
+  <text class="label-place" x="680" y="416" text-anchor="middle">JR 札幌駅</text>
+  <text class="label-en"    x="680" y="436" text-anchor="middle">SAPPORO  ST.</text>
+
+  <!-- 北海道大学植物園的なグリーン示唆を北側にさり気なく(参考表現) -->
+  <rect class="park-fill" x="180" y="60" width="200" height="60" rx="3"/>
+  <text class="label-tiny" x="280" y="96" text-anchor="middle">北大植物園 方面</text>
+
+  <!-- Walking route(faint dashed) hotel → station -->
+  <path class="route" d="M 380 300 L 380 420 L 600 420"/>
+
+  <!-- Hotel marker (北7×西7 = 380,300) -->
+  <g>
+    <circle class="marker-ring" cx="380" cy="300" r="20"/>
+    <circle class="marker-ring" cx="380" cy="300" r="12"/>
+    <line x1="380" y1="294" x2="380" y2="262" stroke="#904848" stroke-width="1.4"/>
+    <circle class="marker-pin" cx="380" cy="300" r="5"/>
+    <text class="label-place" x="380" y="250" text-anchor="middle">開土 KAIDO</text>
+    <text class="label-en"    x="380" y="266" text-anchor="middle">HOTEL  KAIDO</text>
+  </g>
+
+  <!-- 主要通り名（控えめに） -->
+  <text class="label-st" x="386" y="40">西7丁目通</text>
+  <text class="label-st" x="686" y="40">駅前通</text>
+  <text class="label-st" x="28" y="306">北7条通</text>
+  <text class="label-st" x="28" y="466">北5条手稲通</text>
+
+  <!-- Compass top-right -->
+  <g transform="translate(740, 70)">
+    <line x1="0" y1="6" x2="0" y2="-28" stroke="#904848" stroke-width="1.2"/>
+    <polygon points="-4,-20 0,-30 4,-20" fill="#904848"/>
+    <text class="label-en" x="0" y="22" text-anchor="middle">N</text>
+  </g>
+
+  <!-- Scale bar bottom-left -->
+  <g transform="translate(36, 568)">
+    <line x1="0" y1="0" x2="80" y2="0" stroke="rgba(34,34,34,.55)" stroke-width="1.2"/>
+    <line x1="0" y1="-3" x2="0" y2="3" stroke="rgba(34,34,34,.55)" stroke-width="1.2"/>
+    <line x1="40" y1="-2" x2="40" y2="2" stroke="rgba(34,34,34,.4)" stroke-width="1.2"/>
+    <line x1="80" y1="-3" x2="80" y2="3" stroke="rgba(34,34,34,.55)" stroke-width="1.2"/>
+    <text class="label-tiny" x="40" y="-8" text-anchor="middle">100 m</text>
+  </g>
+
+  <!-- subtle index header bottom-right -->
+  <text class="label-en" x="764" y="582" text-anchor="end">SAPPORO  HOKKAIDO  ・  N7W7</text>
+</svg>
