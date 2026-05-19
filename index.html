@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260519m" />
+<link rel="stylesheet" href="assets/styles.css?v=20260519n" />
 </head>
 <body>
 <!-- ============ HEADER (maroon / 6-nav) ============ -->
@@ -15,7 +15,7 @@
   <a href="index.html" class="logo">
     <img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" />
   </a>
-  <nav class="nav"><a href="concept.html">PHILOSOPHY</a><a href="rooms.html">ROOMS</a><a href="gallery.html">GALLERY</a><a href="#">NEWS</a><a href="access.html">ACCESS</a><a href="access.html#reserve">CONTACT</a></nav>
+  <nav class="nav"><a href="concept.html">PHILOSOPHY</a><a href="rooms.html">ROOMS</a><a href="gallery.html">GALLERY</a><a href="index.html#news">NEWS</a><a href="access.html">ACCESS</a><a href="access.html#reserve">CONTACT</a></nav>
   <div class="header-right">
     <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
     <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
@@ -26,7 +26,7 @@
 </header>
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <div class="mobile-menu-inner">
-    <ul class="mobile-menu-list"><li><a href="concept.html">PHILOSOPHY</a></li><li><a href="rooms.html">ROOMS</a></li><li><a href="gallery.html">GALLERY</a></li><li><a href="#">NEWS</a></li><li><a href="access.html">ACCESS</a></li><li><a href="access.html#reserve">CONTACT</a></li></ul>
+    <ul class="mobile-menu-list"><li><a href="concept.html">PHILOSOPHY</a></li><li><a href="rooms.html">ROOMS</a></li><li><a href="gallery.html">GALLERY</a></li><li><a href="index.html#news">NEWS</a></li><li><a href="access.html">ACCESS</a></li><li><a href="access.html#reserve">CONTACT</a></li></ul>
     <div class="mobile-menu-meta">
       <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
       <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
@@ -47,29 +47,38 @@
   </div>
 </section>
 
-<!-- ============ TITLEPAGE (中扉 / 白) ============ -->
-<section class="titlepage" id="titlepage">
-  <div class="titlepage-inner">
-    <img class="titlepage-logo" src="assets/images/logo-vertical-red.png" alt="開土 KAIDO" />
-    <div class="titlepage-text">
-      <h1 class="titlepage-headline">
-        <img src="assets/images/titlepage-headline.png" alt="Hotel to Live, Room to Breathe." />
-      </h1>
-      <div class="titlepage-jp"><img src="assets/images/titlepage-jp.png" alt="開土 KAIDO、誕生" /></div>
+<!-- ============ DECK (中扉→あなたを、開く→写真 / スクロール固定めくれ) ============ -->
+<section class="deck" id="deck">
+  <div class="deck-stage">
+
+    <!-- slide 1 : ロゴ＋文字（中扉） -->
+    <div class="deck-slide deck-cover">
+      <div class="titlepage-inner">
+        <img class="titlepage-logo" src="assets/images/logo-vertical-red.png" alt="開土 KAIDO" />
+        <div class="titlepage-text">
+          <h1 class="titlepage-headline">
+            <img src="assets/images/titlepage-headline.png" alt="Hotel to Live, Room to Breathe." />
+          </h1>
+          <div class="titlepage-jp"><img src="assets/images/titlepage-jp.png" alt="開土 KAIDO、誕生" /></div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="titlepage-vertical" aria-hidden="true">
-    <span class="tv-text">あなたを、開く。</span>
-    <span class="tv-cue"></span>
+
+    <!-- slide 2 : あなたを、開く（縦書き） -->
+    <div class="deck-slide deck-vertical">
+      <span class="tv-text">あなたを、開く。</span>
+    </div>
+
+    <!-- slide 3-6 : 写真（1枚ずつ） -->
+    <div class="deck-slide deck-photo" style="background-image:url('assets/images/philosophy_02.jpg')"></div>
+    <div class="deck-slide deck-photo" style="background-image:url('assets/images/philosophy_01.jpg')"></div>
+    <div class="deck-slide deck-photo" style="background-image:url('assets/images/philosophy_03.jpg')"></div>
+    <div class="deck-slide deck-photo" style="background-image:url('assets/images/philosophy_05.jpg')"></div>
+
+    <div class="deck-counter" id="deckCounter">01 / 06</div>
   </div>
 </section>
-<!-- ============ PHILOSOPHY (白 / 写真展) ============ -->
-<section class="philosophy" id="philosophy">
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_02.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_01.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_03.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_05.jpg')"></div></figure>
-</section>
+
 <!-- ============ ROOMS (白 / 左揃え見出し・写真右) ============ -->
 <section class="rooms" id="rooms">
   <div class="rooms-header">
@@ -114,6 +123,55 @@
     <a href="access.html#reserve" class="reserve-btn reserve-btn--solid">RESERVE</a>
   </div>
 </section>
+
+<!-- ============ NEWS (白 / 同トンマナ) ============ -->
+<!-- ※ 文言はすべて仮（ダミー）。確定情報差し替え予定 -->
+<section class="news" id="news">
+  <div class="rooms-header">
+    <h2 class="rooms-title">NEWS</h2>
+    <p class="rooms-subtitle">開土 KAIDO からのお知らせ。</p>
+  </div>
+  <div class="news-list">
+    <a class="news-row" href="#">
+      <span class="news-date">2026.04.23</span>
+      <span class="news-cat">TOPICS</span>
+      <span class="news-ttl">ここにテキストが入ります。ここにテキストが入ります。</span>
+    </a>
+    <a class="news-row" href="#">
+      <span class="news-date">2026.04.10</span>
+      <span class="news-cat">INFO</span>
+      <span class="news-ttl">ここにテキストが入ります。</span>
+    </a>
+    <a class="news-row" href="#">
+      <span class="news-date">2026.03.28</span>
+      <span class="news-cat">PRESS</span>
+      <span class="news-ttl">ここにテキストが入ります。ここにテキストが入ります。</span>
+    </a>
+    <a class="news-row" href="#">
+      <span class="news-date">2026.03.01</span>
+      <span class="news-cat">TOPICS</span>
+      <span class="news-ttl">ここにテキストが入ります。</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ ACCESS (白 / 同トンマナ) ============ -->
+<section class="access-home" id="access">
+  <div class="rooms-header">
+    <h2 class="rooms-title">ACCESS</h2>
+    <p class="rooms-subtitle">札幌駅 徒歩圏内、街なかの隠れ家。</p>
+  </div>
+  <figure class="access-home-visual">
+    <img src="assets/images/area_visual.jpg" alt="" loading="lazy" />
+  </figure>
+  <dl class="access-dl">
+    <div><dt>ADDRESS</dt><dd>〒060-0807　北海道札幌市北区北7条西7丁目2-16</dd></div>
+    <div><dt>TEL</dt><dd>011-200-0978</dd></div>
+    <div><dt>ACCESS</dt><dd>JR札幌駅 徒歩圏内 ／ 地下鉄さっぽろ駅 徒歩圏内</dd></div>
+    <div><dt>OPERATED</dt><dd>株式会社北開道地所</dd></div>
+  </dl>
+</section>
+
 <!-- ============ FOOTER (maroon / 3-col) ============ -->
 <footer class="footer">
   <div class="footer-grid">
@@ -126,7 +184,7 @@
         <li><a href="concept.html">PHILOSOPHY</a></li>
         <li><a href="rooms.html">ROOMS</a></li>
         <li><a href="gallery.html">GALLERY</a></li>
-        <li><a href="#">NEWS</a></li>
+        <li><a href="index.html#news">NEWS</a></li>
         <li><a href="access.html">ACCESS</a></li>
         <li><a href="access.html#reserve">CONTACT</a></li>
       </ul>
@@ -152,6 +210,6 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260519m" defer></script>
+<script src="assets/script.js?v=20260519n" defer></script>
 </body>
 </html>

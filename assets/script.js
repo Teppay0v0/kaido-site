@@ -5,6 +5,14 @@ const heroFront = document.getElementById('heroFront');
 const heroBase  = document.querySelector('.hero-layer.hero-base');
 const heroVert  = document.getElementById('heroVert');
 
+// ===== Deck (中扉→あなたを、開く→写真) : scroll-pinned peel slideshow =====
+// .deck is (N)*100vh tall; .deck-stage is sticky (100vh). Each scroll "segment"
+// peels the current top slide away from the BOTTOM upward (clip-path inset),
+// revealing the next slide beneath — one at a time, mirroring the hero めくれ.
+const deckEl      = document.getElementById('deck');
+const deckSlides  = document.querySelectorAll('#deck .deck-slide');
+const deckCounter = document.getElementById('deckCounter');
+
 // ===== Hero scroll-driven 2-stage clip =====
 // Layout: .hero is 300vh tall; inside it .hero-stage is sticky (100vh) and stays pinned.
 // Scrollable distance inside hero = 300vh - 100vh = 200vh.
@@ -143,6 +151,9 @@ function tick(){
 
   // ===== Atelier — scroll-driven photo placement =====
   updateAtelier();
+
+  // ===== Deck — scroll-pinned peel slideshow =====
+  updateDeck();
 
   // Header state: stay "on-hero" until we've passed the first viewport-worth of scroll.
   if(scrolled < window.innerHeight * 0.6){
@@ -324,6 +335,53 @@ function updateAtelier(){
     if(shouldShow !== atelierGalleryLink.classList.contains('is-visible')){
       atelierGalleryLink.classList.toggle('is-visible', shouldShow);
     }
+  }
+}
+
+// ===== Deck peel slideshow driver =====
+// progress p (0→1) across the section. With N slides there are (N-1) peels.
+//   cur = index of the slide currently peeling (top-most still present)
+//   t   = local progress of that peel (0→1) → clip-path inset bottom 0→100%
+// Slides above cur are gone (clipped 100%); slides below are static beneath.
+function updateDeck(){
+  if(!deckEl || !deckSlides.length) return;
+  const rect  = deckEl.getBoundingClientRect();
+  const total = deckEl.offsetHeight - window.innerHeight;
+  const scrolled = Math.min(Math.max(-rect.top, 0), total);
+  const p = total > 0 ? scrolled / total : 0;
+
+  const N   = deckSlides.length;
+  const seg = 1 / (N - 1);
+  let cur = Math.floor(p / seg + 1e-9);
+  if(cur < 0)      cur = 0;
+  if(cur > N - 2)  cur = N - 2;
+  const t = Math.max(0, Math.min(1, (p - cur * seg) / seg));
+  const e = easeOut(t);
+
+  deckSlides.forEach((el, i) => {
+    el.style.zIndex = String(N - i);   // slide 0 on top, last slide at bottom
+    if(i < cur){
+      // already peeled away
+      el.style.clipPath = 'inset(0 0 100% 0)';
+      el.style.opacity  = '0';
+      el.style.transform = 'none';
+    } else if(i === cur){
+      // peeling: bottom edge rises (clip from bottom) + a slight upward lift
+      el.style.clipPath = `inset(0 0 ${(e * 100).toFixed(2)}% 0)`;
+      el.style.opacity  = '1';
+      el.style.transform = `translateY(${(-e * 5).toFixed(2)}vh) scale(${(1 - 0.025 * e).toFixed(4)})`;
+    } else {
+      // waiting underneath, fully intact
+      el.style.clipPath = 'inset(0 0 0 0)';
+      el.style.opacity  = '1';
+      el.style.transform = 'none';
+    }
+  });
+
+  if(deckCounter){
+    const shown = Math.min(N, Math.max(1, Math.round(p * (N - 1)) + 1));
+    deckCounter.textContent =
+      ('0' + shown).slice(-2) + ' / ' + ('0' + N).slice(-2);
   }
 }
 
