@@ -2285,12 +2285,18 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .menu-toggle span{ background:#1a1a1a !important; }
 
 /* ヒーロー: マルーン額装の中で 2段クリップ(めくれ)演出を維持。
-   stageの地色マルーンを縁として覗かせ、画像レイヤーを内側にインセット。 */
+   画像ボックスは縦横比 3:4 固定。stageの地色マルーンを縁として覗かせる。
+   高さは「縦に収まる範囲」と「横88vwで決まる高さ」の小さい方＝常に画面内。
+   JSの座標ロジックは実ボックス寸法基準なので比率固定でも破綻しない。 */
 .hero-stage{ background:var(--maroon) !important; }
-.hero-layer, .hero-vignette{
-  inset:118px 5vw 84px !important;   /* 上=ヘッダー回避+額/左右5%/下=額 */
+.hero-layer, .hero-vignette, .hero-overlay{
+  inset:auto !important;
+  position:absolute !important;
+  top:50% !important; left:50% !important;
+  transform:translate(-50%,-50%) !important;
+  height:min(calc(100vh - 196px), calc(88vw * 4 / 3)) !important;
+  aspect-ratio:3 / 4 !important;
 }
-.hero-overlay{ inset:118px 5vw 84px !important; }
 
 /* === 260519-3: フッターの不要な横線を完全除去 === */
 /* EXPLORE / INFORMATION / CONNECT 見出し横の装飾線を削除 */
@@ -2354,8 +2360,11 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   background-color:#fff; overflow:hidden;
   will-change:clip-path,transform,opacity; backface-visibility:hidden;
 }
-.deck-slide.deck-photo{
-  background-size:cover; background-position:center; background-repeat:no-repeat;
+/* 写真スライド：全画面トリミングをやめ、白地に余白をとって全体を表示 */
+.deck-slide.deck-photo{ background-color:#fff; }
+.deck-slide.deck-photo img{
+  max-width:62vw; max-height:72vh; width:auto; height:auto;
+  object-fit:contain; display:block;
 }
 /* slide1: 中扉（既存 .titlepage-inner 系をそのまま流用＝トンマナ一致） */
 .deck-cover .titlepage-inner{
@@ -2399,6 +2408,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 @media (max-width:680px){
   .deck-cover .titlepage-inner{ flex-direction:column; gap:48px; padding:0 28px; }
   .deck-vertical .tv-text{ font-size:18px; letter-spacing:.4em; }
+  .deck-slide.deck-photo img{ max-width:84vw; max-height:64vh; }
   .deck-counter{ left:24px; bottom:28px; font-size:11px; }
   .news{ padding:90px 24px 110px; }
   .news-row{ grid-template-columns:1fr; gap:8px; padding:24px 4px; }
