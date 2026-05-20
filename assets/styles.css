@@ -2567,3 +2567,71 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 
 /* もし maplibre 由来のtipが残っていても完全に隠す（保険） */
 .maplibregl-popup-tip{ display:none !important; }
+
+/* === 260520-8: Roomsの各行を詳細ページへのリンク化（控えめ） === */
+.rooms .room-link{
+  text-decoration:none; color:inherit;
+  cursor:pointer;
+}
+.rooms .room-link .room-cta{
+  margin-top:18px;
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--maroon); font-weight:700;
+  font-size:11px; letter-spacing:.32em;
+  opacity:.85;
+  transition:opacity .35s ease;
+}
+.rooms .room-link .room-cta::after{
+  content:'→';
+  font-size:13px; letter-spacing:0;
+  display:inline-block;
+  transition:transform .35s cubic-bezier(.2,.7,.2,1);
+}
+.rooms .room-link:hover .room-cta{ opacity:1; }
+.rooms .room-link:hover .room-cta::after{ transform:translateX(5px); }
+/* 写真は ごく僅か な opacity だけ動かす（zoom等は入れない） */
+.rooms .room-photo{ transition:opacity .5s ease; }
+.rooms .room-link:hover .room-photo{ opacity:.94; }
+
+/* === Room detail page（room-sora/ki/ishi/tsuchi.html） === */
+.room-page{
+  background:#fff;
+  padding:140px 80px 200px;
+  max-width:1180px; margin:0 auto;
+}
+.room-page-hero{ margin:0 0 80px; }
+.room-page-hero img{ display:block; width:100%; height:auto; }
+.room-page-header{
+  display:grid; grid-template-columns:160px 1fr; align-items:center; gap:48px;
+  margin:0 0 64px;
+}
+.room-page-kanji{
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  font-size:100px; font-weight:700; color:var(--maroon);
+  line-height:1; text-align:center;
+}
+.room-page-meta .rooms-title{
+  font-size:clamp(36px,4vw,52px);
+  margin:0 0 12px;
+}
+.room-page-body{ max-width:780px; margin:0 0 80px; }
+.room-page-lead{
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  font-size:17px; line-height:2.1; letter-spacing:.06em;
+  color:#222; margin:0;
+}
+.room-page-spec{ max-width:820px; margin:0 0 100px !important; }
+.room-page-nav{ text-align:center; margin-top:80px; }
+.room-page-back{
+  color:var(--maroon); font-weight:700; font-size:11px; letter-spacing:.32em;
+  text-decoration:none; padding-bottom:4px;
+  border-bottom:1px solid rgba(144,72,72,.4);
+  transition:opacity .35s ease;
+}
+.room-page-back:hover{ opacity:.7; }
+@media (max-width:680px){
+  .room-page{ padding:120px 24px 110px; }
+  .room-page-header{ grid-template-columns:80px 1fr; gap:24px; margin-bottom:48px; }
+  .room-page-kanji{ font-size:54px; }
+  .room-page-spec{ margin:0 0 60px !important; }
+}

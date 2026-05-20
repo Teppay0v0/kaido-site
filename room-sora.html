@@ -3,19 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>GALLERY ｜ 開土 KAIDO</title>
+<title>空 SORA ｜ 開土 KAIDO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/styles.css?v=20260520m" />
 </head>
 <body>
-<!-- ============ HEADER (maroon / 6-nav) ============ -->
+<!-- HEADER -->
 <header class="header" id="header">
-  <a href="index.html" class="logo">
-    <img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" />
-  </a>
-  <nav class="nav"><a href="concept.html">CONCEPT</a><a href="rooms.html">ROOMS</a><a href="gallery.html" aria-current="page">GALLERY</a><a href="index.html#news">NEWS</a><a href="access.html">ACCESS</a><a href="access.html#reserve">CONTACT</a></nav>
+  <a href="index.html" class="logo"><img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" /></a>
+  <nav class="nav"><a href="concept.html">CONCEPT</a><a href="rooms.html" aria-current="page">ROOMS</a><a href="gallery.html">GALLERY</a><a href="index.html#news">NEWS</a><a href="access.html">ACCESS</a><a href="access.html#reserve">CONTACT</a></nav>
   <div class="header-right">
     <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
     <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
@@ -26,29 +24,62 @@
 </header>
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <div class="mobile-menu-inner">
-    <ul class="mobile-menu-list"><li><a href="concept.html">CONCEPT</a></li><li><a href="rooms.html">ROOMS</a></li><li><a href="gallery.html" aria-current="page">GALLERY</a></li><li><a href="index.html#news">NEWS</a></li><li><a href="access.html">ACCESS</a></li><li><a href="access.html#reserve">CONTACT</a></li></ul>
+    <ul class="mobile-menu-list">
+      <li><a href="concept.html">CONCEPT</a></li>
+      <li><a href="rooms.html" aria-current="page">ROOMS</a></li>
+      <li><a href="gallery.html">GALLERY</a></li>
+      <li><a href="index.html#news">NEWS</a></li>
+      <li><a href="access.html">ACCESS</a></li>
+      <li><a href="access.html#reserve">CONTACT</a></li>
+    </ul>
     <div class="mobile-menu-meta">
       <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
       <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
     </div>
   </div>
 </div>
-<!-- ============ GALLERY ============ -->
-<section class="philosophy" id="gallery">
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_01.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_02.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_03.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_04.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_05.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_06.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_07.jpg')"></div></figure>
+
+<!-- ROOM DETAIL -->
+<section class="room-page" id="room">
+  <figure class="room-page-hero">
+    <img src="assets/images/room_04_sora.jpg" alt="空 SORA" loading="lazy" />
+  </figure>
+
+  <div class="room-page-header">
+    <div class="room-page-kanji">空</div>
+    <div class="room-page-meta">
+      <h1 class="rooms-title room-page-title">SORA</h1>
+      <p class="rooms-subtitle">4F／屋上テラス付きデザイナーズ空間。</p>
+    </div>
+  </div>
+
+  <div class="room-page-body">
+    <p class="room-page-lead">
+      ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。<br/>
+      ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。
+    </p>
+  </div>
+
+  <dl class="access-dl room-page-spec">
+    <div><dt>FLOOR</dt><dd>4F</dd></div>
+    <div><dt>CAPACITY</dt><dd>定員 8名</dd></div>
+    <div><dt>AMENITY</dt><dd>屋上テラス／全室サウナ</dd></div>
+    <div><dt>VIEW</dt><dd>札幌の街並み・北の空</dd></div>
+  </dl>
+
+  <div class="rooms-reserve">
+    <a href="access.html#reserve" class="reserve-btn reserve-btn--solid">RESERVE</a>
+  </div>
+
+  <nav class="room-page-nav">
+    <a class="room-page-back" href="rooms.html">← ALL ROOMS</a>
+  </nav>
 </section>
-<!-- ============ FOOTER (maroon / 3-col) ============ -->
+
+<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-grid">
-    <div class="footer-logo">
-      <img src="assets/images/logo-vertical.png" alt="開土 KAIDO" />
-    </div>
+    <div class="footer-logo"><img src="assets/images/logo-vertical.png" alt="開土 KAIDO" /></div>
     <nav class="footer-col">
       <h4>— EXPLORE —</h4>
       <ul>
