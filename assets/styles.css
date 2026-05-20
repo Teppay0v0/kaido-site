@@ -2491,3 +2491,10 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   font-weight:700; letter-spacing:.22em; font-size:11px;
 }
 .kaido-tip::before{ border-top-color:#904848 !important; }
+.kaido-tip--sub{
+  background:#fbf9f4 !important; color:#904848 !important;
+  border:1px solid #904848 !important;
+  font-size:10px !important; letter-spacing:.2em !important;
+  padding:4px 10px !important;
+}
+.kaido-tip--sub::before{ border-bottom-color:#904848 !important; border-top-color:transparent !important; }

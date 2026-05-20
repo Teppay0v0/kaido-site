@@ -5,7 +5,8 @@
    CSSフィルタで Snazzy Maps "Vintage" 風の暖色セピアに着色。
    ▼ 緯度経度はここのみ:
    ============================================================ */
-const KAIDO_LATLNG = { lat: 43.07440, lng: 141.34410 }; // 北7条西7丁目2-16（仮）
+const KAIDO_LATLNG    = { lat: 43.07010, lng: 141.34640 }; // 北7条西7丁目2-16
+const SAPPORO_STATION = { lat: 43.06860, lng: 141.35070 }; // JR 札幌駅（向き確認用）
 
 function loadCss(href){
   const l = document.createElement('link');
@@ -36,9 +37,13 @@ function loadScript(src){
     return;
   }
 
+  // ホテルと札幌駅の中間を中心、両方が画面に収まるようズーム控えめ
   const map = L.map(el, {
-    center: [KAIDO_LATLNG.lat, KAIDO_LATLNG.lng],
-    zoom: 16,
+    center: [
+      (KAIDO_LATLNG.lat + SAPPORO_STATION.lat) / 2,
+      (KAIDO_LATLNG.lng + SAPPORO_STATION.lng) / 2
+    ],
+    zoom: 15,
     zoomControl: true,
     attributionControl: true,
     scrollWheelZoom: false,    // ページスクロールを優先
@@ -61,17 +66,31 @@ function loadScript(src){
     }
   ).addTo(map);
 
-  // ホテルマーカー：maroonドット＋白縁
+  // ホテルマーカー：maroonドット＋白縁（メイン）
   L.circleMarker([KAIDO_LATLNG.lat, KAIDO_LATLNG.lng], {
-    radius: 9,
+    radius: 10,
     color: '#ffffff',
     weight: 3,
     fillColor: '#904848',
     fillOpacity: 1
   })
   .bindTooltip('開土 KAIDO', {
-    permanent: true, direction: 'top', offset: [0, -8],
+    permanent: true, direction: 'top', offset: [0, -10],
     className: 'kaido-tip'
+  })
+  .addTo(map);
+
+  // 札幌駅マーカー（位置関係の手がかり・控えめ）
+  L.circleMarker([SAPPORO_STATION.lat, SAPPORO_STATION.lng], {
+    radius: 6,
+    color: '#904848',
+    weight: 2,
+    fillColor: '#fbf9f4',
+    fillOpacity: 1
+  })
+  .bindTooltip('JR 札幌駅', {
+    permanent: true, direction: 'bottom', offset: [0, 8],
+    className: 'kaido-tip kaido-tip--sub'
   })
   .addTo(map);
 })();
