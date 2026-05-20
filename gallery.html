@@ -7,10 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521h" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521i" />
 </head>
 <body>
-<!-- ============ HEADER (maroon / 6-nav) ============ -->
+<!-- ============ HEADER ============ -->
 <header class="header" id="header">
   <a href="index.html" class="logo">
     <img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" />
@@ -33,17 +33,22 @@
     </div>
   </div>
 </div>
-<!-- ============ GALLERY ============ -->
-<section class="philosophy" id="gallery">
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_01.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_02.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_03.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_04.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_05.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_06.jpg')"></div></figure>
-  <figure class="ph-plate"><div class="ph-photo" style="background-image:url('assets/images/philosophy_07.jpg')"></div></figure>
-</section>
-<!-- ============ FOOTER (maroon / 3-col) ============ -->
+
+<!-- ============ GALLERY (scatter) ============ -->
+<header class="gallery-head">
+  <p class="rd-section-label">— GALLERY —</p>
+  <h1 class="rd-section-h">写真集</h1>
+</header>
+
+<main class="gallery-scatter" id="galleryScatter">
+  <figure class="g-card" style="--w:420px"><img src="assets/images/philosophy_01.jpg" alt="" /></figure>
+  <figure class="g-card" style="--w:360px"><img src="assets/images/philosophy_02.jpg" alt="" /></figure>
+  <figure class="g-card" style="--w:460px"><img src="assets/images/philosophy_03.jpg" alt="" /></figure>
+  <figure class="g-card" style="--w:380px"><img src="assets/images/philosophy_04.jpg" alt="" /></figure>
+  <figure class="g-card" style="--w:400px"><img src="assets/images/philosophy_05.jpg" alt="" /></figure>
+</main>
+
+<!-- ============ FOOTER ============ -->
 <footer class="footer">
   <div class="footer-grid">
     <div class="footer-logo">
@@ -81,6 +86,63 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521h" defer></script>
+<script src="assets/script.js?v=20260521i" defer></script>
+<script defer>
+(function(){
+  function place(){
+    const sec = document.getElementById('galleryScatter');
+    const cards = sec ? sec.querySelectorAll('.g-card') : [];
+    if(!sec || !cards.length) return;
+
+    // Wait until images have natural sizes before placing
+    const imgs = Array.from(sec.querySelectorAll('img'));
+    const ready = imgs.every(i => i.complete && i.naturalWidth);
+    if(!ready){
+      Promise.all(imgs.map(i => i.complete ? Promise.resolve() :
+        new Promise(r => { i.onload = i.onerror = r; })
+      )).then(place);
+      return;
+    }
+
+    const PAD = 24;        // 端からの最小余白
+    const MIN_DIST = 60;   // 中心同士の最小距離（重なり過ぎ防止）
+    const sw = sec.clientWidth;
+    // 動的にセクション高さを十分確保
+    sec.style.height = '';
+    const placed = [];
+    cards.forEach(card => {
+      card.style.left = ''; card.style.top = '';
+      const w = card.offsetWidth, h = card.offsetHeight;
+      let x = PAD, y = PAD, ok = false, tries = 0;
+      const maxX = Math.max(PAD, sw - w - PAD);
+      const sh = Math.max(1200, (placed.reduce((m,p)=>Math.max(m,p.y+p.h),0) + h + 600));
+      const maxY = Math.max(PAD, sh - h - PAD);
+      while(!ok && tries < 200){
+        x = PAD + Math.random() * (maxX - PAD);
+        y = PAD + Math.random() * (maxY - PAD);
+        ok = placed.every(p => {
+          const dx = (x + w/2) - (p.x + p.w/2);
+          const dy = (y + h/2) - (p.y + p.h/2);
+          return Math.hypot(dx, dy) > Math.min(w, p.w) * 0.55 + MIN_DIST;
+        });
+        tries++;
+      }
+      card.style.left = x + 'px';
+      card.style.top  = y + 'px';
+      placed.push({x, y, w, h});
+    });
+    // セクション高さを最下端カードに合わせて調整
+    const bottom = placed.reduce((m,p) => Math.max(m, p.y + p.h), 0);
+    sec.style.height = (bottom + 160) + 'px';
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', place);
+  else place();
+  window.addEventListener('resize', () => {
+    clearTimeout(window._galleryPlaceTimer);
+    window._galleryPlaceTimer = setTimeout(place, 200);
+  });
+})();
+</script>
 </body>
 </html>
