@@ -2799,7 +2799,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .rd-spaces{ padding:200px 80px; }
 .rd-space{
   display:grid; grid-template-columns:1fr 1fr; gap:64px;
-  align-items:center; padding:120px 0;       /* 各space間も拡大 */
+  align-items:end; padding:120px 0;          /* 下端を揃える */
   border-top:1px solid rgba(144,72,72,.18);
 }
 .rd-space:first-of-type{ border-top:0; padding-top:0; }
