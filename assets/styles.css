@@ -2469,7 +2469,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 
 /* === 260520-2: Google Maps コンテナ（カスタムスタイル / SVGフォールバック対応） === */
 .access-home-map .kaido-map{
-  width:100%; aspect-ratio:4 / 3;
+  width:100%; aspect-ratio:3 / 2;     /* 4:3→3:2 で約50px短く（縦長過ぎを解消） */
   border:1px solid rgba(144,72,72,.18);
   background:#fbf9f4;
   position:relative; overflow:hidden;
