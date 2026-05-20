@@ -2305,6 +2305,19 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .header, .header.on-hero{
   padding:14px 44px !important;
 }
+/* ロゴサイズもスクロール状態に依存させない（PDF仕様の34px固定） */
+.header .logo-img,
+.header.scrolled .logo-img,
+.header.on-hero .logo-img{
+  height:34px !important;
+}
+@media (max-width:680px){
+  .header .logo-img,
+  .header.scrolled .logo-img,
+  .header.on-hero .logo-img{
+    height:26px !important;
+  }
+}
 
 /* === 260519-3: フッターの不要な横線を完全除去 === */
 /* EXPLORE / INFORMATION / CONNECT 見出し横の装飾線を削除 */
