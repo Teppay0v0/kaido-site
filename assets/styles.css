@@ -2294,9 +2294,10 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   position:absolute !important;
   top:50% !important; left:50% !important;
   transform:translate(-50%,-50%) !important;
-  /* 横長 3:4（高さ:幅 = 3:4 → aspect-ratio: 4/3） */
-  height:min(calc(100vh - 196px), calc(88vw * 3 / 4)) !important;
-  aspect-ratio:4 / 3 !important;
+  /* 横長 16:9。height=min(縦の余地, 横幅88vwで決まる高さ)。
+     top:50%+translate-50% で上下マージン数学的に均等。 */
+  height:min(calc(100vh - 160px), calc(88vw * 9 / 16)) !important;
+  aspect-ratio:16 / 9 !important;
 }
 
 /* === 260519-3: フッターの不要な横線を完全除去 === */
