@@ -10,38 +10,30 @@
 const KAIDO_GMAP_KEY = ''; // ← ここに API キーを貼る
 const KAIDO_LATLNG   = { lat: 43.07440, lng: 141.34410 }; // 北7条西7丁目2-16（仮）
 
-/* エディトリアル・スタイル：クリーム地に maroon #904848 アクセント。
-   POIラベルや交通標識を絞り、地形/道路/水域を柔らかく統一。 */
+/* Snazzy Maps "Vintage" (by antoine heitzmann)
+   https://snazzymaps.com/style/265633/vintage
+   タン/クリーム(#b39443・#f5f5f5)＋淡いティール水域の暖色セピア。 */
 const KAIDO_MAP_STYLES = [
-  { elementType: "geometry", stylers: [{ color: "#f8f4ec" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#7a5a5a" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#fbf9f4" }, { weight: 2 }] },
-  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-
-  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#d4c4ba" }] },
-  { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
-
-  { featureType: "landscape.man_made", elementType: "geometry", stylers: [{ color: "#f3ece0" }] },
-  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#ece2d2" }] },
-
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#ebe1d1" }] },
-  { featureType: "poi", elementType: "labels.text", stylers: [{ visibility: "off" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#dfd4c0" }] },
-  { featureType: "poi.business", stylers: [{ visibility: "off" }] },
-
+  { featureType: "all", elementType: "geometry", stylers: [{ color: "#f5f5f5" }, { weight: 1 }] },
+  { featureType: "all", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+  { featureType: "all", elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+  { featureType: "all", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative.land_parcel", elementType: "geometry", stylers: [{ color: "#b39443" }] },
+  { featureType: "administrative.land_parcel", elementType: "labels.text.fill", stylers: [{ color: "#bdbdbd" }] },
+  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#e9dccb" }] },
-  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#fdf8ec" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f3e8d0" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#d4c4b0" }] },
-  { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
-
-  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#c8b6a8" }] },
-  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#b39888" }] },
-  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#904848" }] },
-
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#dccdc0" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#a08878" }] }
+  { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#b39443" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#b39443" }] },
+  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+  { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+  { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
+  { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#71c0c9" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }
 ];
 
 /* Googleからのコールバック。<script> の callback=initKaidoMap で呼ばれる。 */
