@@ -2139,7 +2139,7 @@ img{ max-width:100%; height:auto; }
   background-size:cover; background-position:center; background-repeat:no-repeat; }
 
 /* ---- ROOMS : 左揃え見出し / [漢字 | 情報 | 写真右] / 写真は縦に連続 ---- */
-.rooms{ background:#fff; padding:160px 80px 180px; }
+.rooms{ background:#fff; padding:160px 80px 360px; }   /* RESERVE下を倍に */
 .rooms-header{ text-align:left; max-width:1180px; margin:0 auto 120px; }
 .rooms-title{
   margin:0 0 20px; color:var(--maroon);
@@ -2177,7 +2177,7 @@ img{ max-width:100%; height:auto; }
   width:460px; aspect-ratio:519 / 379;   /* 見本の room写真と同比率(≒1.37) */
   background-size:cover; background-position:center; background-repeat:no-repeat;
 }
-.rooms-reserve{ text-align:center; margin-top:180px; }  /* 下(rooms padding-bottom 180)と上下均等 */
+.rooms-reserve{ text-align:center; margin-top:360px; }  /* 上下とも倍に */
 .reserve-btn--solid{
   display:inline-block; background:var(--maroon); color:var(--cream);
   border:0; padding:18px 56px; font-weight:700;
