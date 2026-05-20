@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521l" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521m" />
 </head>
 <body>
 <!-- ============ HEADER ============ -->
@@ -40,14 +40,14 @@
   <h1 class="rd-section-h">写真集</h1>
 </header>
 
-<!-- ============ GALLERY FALL — スクロールで1枚ずつ降りてくる ============ -->
-<section class="gallery-fall" id="galleryFall">
-  <div class="gallery-fall-stage">
-    <figure class="gf-card" style="--w:420px; --rx:30%; --ry:14%"><img src="assets/images/philosophy_01.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--w:360px; --rx:36%; --ry:18%"><img src="assets/images/philosophy_02.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--w:460px; --rx:26%; --ry:22%"><img src="assets/images/philosophy_03.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--w:380px; --rx:34%; --ry:26%"><img src="assets/images/philosophy_04.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--w:400px; --rx:30%; --ry:20%"><img src="assets/images/philosophy_05.jpg" alt="" /></figure>
+<!-- ============ GALLERY STACK — 自動再生・スクロール無し ============ -->
+<section class="gallery-stack" id="galleryStack">
+  <div class="gallery-stack-area">
+    <figure class="gf-card" style="--rx:18%; --ry:4%"><img src="assets/images/philosophy_01.jpg" alt="" /></figure>
+    <figure class="gf-card" style="--rx:24%; --ry:15%"><img src="assets/images/philosophy_02.jpg" alt="" /></figure>
+    <figure class="gf-card" style="--rx:20%; --ry:25%"><img src="assets/images/philosophy_03.jpg" alt="" /></figure>
+    <figure class="gf-card" style="--rx:28%; --ry:35%"><img src="assets/images/philosophy_04.jpg" alt="" /></figure>
+    <figure class="gf-card" style="--rx:22%; --ry:18%"><img src="assets/images/philosophy_05.jpg" alt="" /></figure>
   </div>
 </section>
 
@@ -89,79 +89,41 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521l" defer></script>
+<script src="assets/script.js?v=20260521m" defer></script>
 <script defer>
-/*  Gallery: 1枚目は最初から置かれている。2枚目以降はスクロールで
-    その位置に拡大されて現れ、scale 1.4→1.0 + 微settle で前のカードの
-    上に着地する。回転なし。 */
+/*  ページ読み込み後、自動再生で5枚が順に拡大→縮小して重なっていく。
+    スクロールは一切使わない。 */
 (function(){
   function init(){
-    const sec   = document.getElementById('galleryFall');
-    if(!sec) return;
-    const cards = Array.from(sec.querySelectorAll('.gf-card'));
+    const cards = document.querySelectorAll('#galleryStack .gf-card');
     if(!cards.length) return;
 
-    const DRIVEN = cards.length - 1;             // 1枚目は常時表示、残りがスクロール駆動
-    const OVERLAP = 0.18;                        // 次のカードが少し早めに動き出す
-    const sliceLen = 1 / (DRIVEN - (DRIVEN - 1) * OVERLAP);
+    const DUR  = 900;   // 各カードのアニメ時間(ms)
+    const GAP  = 700;   // 次のカードが始まるまでの間隔(ms)
     const easeOut = t => 1 - Math.pow(1 - t, 2.4);
-    const easeOutBack = t => {
-      const c1 = 1.18, c3 = c1 + 1;
-      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-    };
 
-    // 1枚目は常に置かれている
+    function animate(card){
+      const start = performance.now();
+      function step(now){
+        const t = Math.min(1, (now - start) / DUR);
+        const e = easeOut(t);
+        const scale = 1.4 - 0.4 * e;
+        card.style.opacity = Math.min(1, e * 1.3).toFixed(3);
+        card.style.transform = `scale(${scale.toFixed(4)})`;
+        if(t < 1) requestAnimationFrame(step);
+        else { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }
+      }
+      requestAnimationFrame(step);
+    }
+
+    // 1枚目は最初から表示
     cards[0].style.opacity = '1';
     cards[0].style.transform = 'scale(1)';
 
-    function update(){
-      const rect  = sec.getBoundingClientRect();
-      const total = sec.offsetHeight - window.innerHeight;
-      const scrolled = Math.min(Math.max(-rect.top, 0), total);
-      const p = total > 0 ? scrolled / total : 0;
-
-      cards.forEach((card, i) => {
-        if(i === 0) return;  // 1枚目はそのまま
-        const j = i - 1;
-        const start = j * sliceLen * (1 - OVERLAP);
-        const end   = start + sliceLen;
-        let t = (p - start) / (end - start);
-        t = Math.max(0, Math.min(1, t));
-
-        if(t === 0){
-          card.style.opacity = '0';
-          card.style.transform = 'scale(1.4)';
-          return;
-        }
-
-        const approachEnd = 0.78;
-        if(t < approachEnd){
-          // 出現→縮小 (scale 1.4 → 1.02 / opacity 0 → 1)
-          const at = easeOut(t / approachEnd);
-          const scale = 1.4 - 0.38 * at;
-          card.style.opacity = at.toFixed(3);
-          card.style.transform = `scale(${scale.toFixed(4)})`;
-        } else {
-          // 着地のsettle (scale 1.02 → 1.00 を ease-out-back で)
-          const st = (t - approachEnd) / (1 - approachEnd);
-          const settle = easeOutBack(st);
-          const scale = 1.02 - 0.02 * settle;
-          card.style.opacity = '1';
-          card.style.transform = `scale(${scale.toFixed(4)})`;
-        }
-      });
+    // 2枚目以降を間隔を空けて自動再生
+    for(let i = 1; i < cards.length; i++){
+      setTimeout(() => animate(cards[i]), i * GAP);
     }
-
-    let ticking = false;
-    function onScroll(){
-      if(!ticking){
-        requestAnimationFrame(() => { update(); ticking = false; });
-        ticking = true;
-      }
-    }
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', update);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
