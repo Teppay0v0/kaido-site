@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CONTACT ｜ 開土 KAIDO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521u" />
+</head>
+<body>
+<!-- HEADER -->
+<header class="header" id="header">
+  <a href="index.html" class="logo"><img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" /></a>
+  <nav class="nav"><a href="concept.html">CONCEPT</a><a href="index.html#rooms">ROOMS</a><a href="gallery.html">GALLERY</a><a href="news.html">NEWS</a><a href="access.html">ACCESS</a><a href="contact.html" aria-current="page">CONTACT</a></nav>
+  <div class="header-right">
+    <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
+    <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
+  </div>
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <div class="mobile-menu-inner">
+    <ul class="mobile-menu-list">
+      <li><a href="concept.html">CONCEPT</a></li>
+      <li><a href="index.html#rooms">ROOMS</a></li>
+      <li><a href="gallery.html">GALLERY</a></li>
+      <li><a href="news.html">NEWS</a></li>
+      <li><a href="access.html">ACCESS</a></li>
+      <li><a href="contact.html" aria-current="page">CONTACT</a></li>
+    </ul>
+    <div class="mobile-menu-meta">
+      <div class="lang"><span class="active">JP</span><span class="divider">/</span><span>EN</span></div>
+      <a href="access.html#reserve" class="reserve-btn">RESERVE</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact-page" id="contact">
+  <div class="rooms-header">
+    <h2 class="rooms-title">CONTACT</h2>
+    <p class="rooms-subtitle">お問い合わせ</p>
+  </div>
+
+  <div class="contact-intro">
+    <p>
+      開土 KAIDO へのお問い合わせは、下記フォームよりお送りください。<br/>
+      内容を確認のうえ、通常2〜3営業日以内にご返信いたします。<br/>
+      ※ ご予約に関するお問い合わせは <a href="access.html#reserve" class="contact-inline-link">RESERVE</a> ページからも承っております。
+    </p>
+  </div>
+
+  <form class="contact-form" id="contactForm" novalidate>
+    <div class="cf-row">
+      <label class="cf-label" for="cf-name">お名前 <span class="cf-required">必須</span></label>
+      <input class="cf-input" type="text" id="cf-name" name="name" autocomplete="name" required />
+    </div>
+
+    <div class="cf-row">
+      <label class="cf-label" for="cf-kana">フリガナ</label>
+      <input class="cf-input" type="text" id="cf-kana" name="kana" autocomplete="off" />
+    </div>
+
+    <div class="cf-row">
+      <label class="cf-label" for="cf-email">メールアドレス <span class="cf-required">必須</span></label>
+      <input class="cf-input" type="email" id="cf-email" name="email" autocomplete="email" required />
+    </div>
+
+    <div class="cf-row">
+      <label class="cf-label" for="cf-phone">電話番号</label>
+      <input class="cf-input" type="tel" id="cf-phone" name="phone" autocomplete="tel" />
+    </div>
+
+    <div class="cf-row">
+      <label class="cf-label" for="cf-subject">お問い合わせ種別 <span class="cf-required">必須</span></label>
+      <div class="cf-select-wrap">
+        <select class="cf-input cf-select" id="cf-subject" name="subject" required>
+          <option value="">選択してください</option>
+          <option value="reservation">ご予約・空室について</option>
+          <option value="facility">施設・設備について</option>
+          <option value="access">アクセス・送迎について</option>
+          <option value="press">取材・メディアについて</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cf-row">
+      <label class="cf-label" for="cf-message">お問い合わせ内容 <span class="cf-required">必須</span></label>
+      <textarea class="cf-input cf-textarea" id="cf-message" name="message" rows="8" required></textarea>
+    </div>
+
+    <div class="cf-row cf-checkbox-row">
+      <label class="cf-checkbox-label">
+        <input type="checkbox" id="cf-privacy" name="privacy" required />
+        <span><a href="#" class="contact-inline-link">プライバシーポリシー</a>に同意する <span class="cf-required">必須</span></span>
+      </label>
+    </div>
+
+    <div class="cf-submit">
+      <button class="reserve-btn reserve-btn--solid cf-submit-btn" type="submit">送信する</button>
+    </div>
+
+    <p class="cf-note">※ フォーム送信先は確定後に設定します(現在はダミー)。</p>
+  </form>
+
+  <div class="contact-thanks" id="contactThanks" hidden>
+    <h3 class="contact-thanks-h">お問い合わせを受け付けました</h3>
+    <p class="contact-thanks-body">
+      内容を確認のうえ、担当者より2〜3営業日以内にご返信いたします。<br/>
+      ご記入のメールアドレス宛に自動返信を送信しております。
+    </p>
+    <a class="news-article-back-link" href="index.html">← TOP へ戻る</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-logo"><img src="assets/images/logo-vertical.png" alt="開土 KAIDO" /></div>
+    <nav class="footer-col">
+      <h4>— EXPLORE —</h4>
+      <ul>
+        <li><a href="concept.html">CONCEPT</a></li>
+        <li><a href="index.html#rooms">ROOMS</a></li>
+        <li><a href="gallery.html">GALLERY</a></li>
+        <li><a href="news.html">NEWS</a></li>
+        <li><a href="access.html">ACCESS</a></li>
+        <li><a href="contact.html">CONTACT</a></li>
+      </ul>
+    </nav>
+    <nav class="footer-col">
+      <h4>— INFORMATION —</h4>
+      <ul>
+        <li><a href="#">利用規約</a></li>
+        <li><a href="#">特定商取引法に基づく表記</a></li>
+        <li><a href="#">PRIVACY POLICY</a></li>
+      </ul>
+    </nav>
+    <nav class="footer-col">
+      <h4>— CONNECT —</h4>
+      <ul>
+        <li><a href="#">INSTAGRAM</a></li>
+        <li><a href="#">OPERATED CO. SITE</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <span>〒060-0807 北海道札幌市北区北7条西7丁目2-16　TEL.011-200-0978　OPERATED BY 株式会社北開道地所</span>
+    <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
+  </div>
+</footer>
+<script src="assets/script.js?v=20260521u" defer></script>
+<script defer>
+(function(){
+  const form = document.getElementById('contactForm');
+  const thanks = document.getElementById('contactThanks');
+  if(!form) return;
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    // 簡易バリデーション（必須項目のみ）
+    if(!form.checkValidity()){ form.reportValidity(); return; }
+    form.hidden = true;
+    if(thanks){ thanks.hidden = false; thanks.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+})();
+</script>
+</body>
+</html>
