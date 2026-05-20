@@ -2568,62 +2568,65 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 /* もし maplibre 由来のtipが残っていても完全に隠す（保険） */
 .maplibregl-popup-tip{ display:none !important; }
 
-/* === 260520-8: Roomsリンク化 + hover演出（ふわっと光る＋写真がわずかに拡大） === */
+/* === 260520-8: Roomsリンク + hover（一瞬光って戻る／写真は枠ごと拡大） === */
 .rooms .room-link{
   text-decoration:none; color:inherit;
   cursor:pointer;
 }
 
-/* 写真は img を内側に持ち、外枠で clip、img を scale で拡大 */
+/* 写真：枠(.room-photo)ごと scale で全体が拡大。中の img は固定。 */
 .rooms .room-photo{
-  overflow:hidden;
-  background:none;
+  overflow:hidden;             /* 内側 img はみ出しを抑える */
+  transition: transform .9s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+  transform-origin:center;
 }
 .rooms .room-photo img{
   display:block; width:100%; height:100%;
   object-fit:cover; object-position:center;
-  transition: transform 1.1s cubic-bezier(.2,.7,.2,1), filter .9s ease;
-  will-change: transform;
 }
-.rooms .room-link:hover .room-photo img{
+.rooms .room-link:hover .room-photo{
   transform: scale(1.045);
-  filter: brightness(1.02);
+  position:relative; z-index:2;  /* 隣接要素より前へ */
 }
 
-/* テキストはふわっと光る（maroonのソフトグロウ＋わずかに濃く） */
-.rooms .room-kanji,
-.rooms .room-meta,
-.rooms .room-desc,
-.rooms .room-link .room-cta{
-  transition: text-shadow .55s ease, color .45s ease, opacity .45s ease;
+/* テキスト：ホバーした瞬間に一度だけ光って消える（keyframe再生） */
+@keyframes kaidoGlowBig {
+  0%   { text-shadow: none; }
+  35%  { text-shadow: 0 0 26px rgba(144,72,72,.55), 0 0 8px rgba(144,72,72,.35); }
+  100% { text-shadow: none; }
+}
+@keyframes kaidoGlowSoft {
+  0%   { text-shadow: none; }
+  35%  { text-shadow: 0 0 14px rgba(144,72,72,.42); }
+  100% { text-shadow: none; }
 }
 .rooms .room-link:hover .room-kanji{
-  text-shadow: 0 0 22px rgba(144,72,72,.45), 0 0 6px rgba(144,72,72,.25);
+  animation: kaidoGlowBig 1s ease-out;
 }
 .rooms .room-link:hover .room-meta,
-.rooms .room-link:hover .room-desc{
-  text-shadow: 0 0 12px rgba(144,72,72,.28);
+.rooms .room-link:hover .room-desc,
+.rooms .room-link:hover .room-cta{
+  animation: kaidoGlowSoft 1s ease-out;
 }
 
-/* CTA「DETAILS →」: 控えめだが分かるサイン */
+/* CTA「DETAILS →」: 控えめサイン。opacity/矢印 は持続的に動く */
 .rooms .room-link .room-cta{
   margin-top:18px;
   display:inline-flex; align-items:center; gap:8px;
   color:var(--maroon); font-weight:700;
   font-size:11px; letter-spacing:.32em;
   opacity:.82;
+  transition: opacity .45s ease;
 }
 .rooms .room-link .room-cta::after{
   content:'→';
   font-size:13px; letter-spacing:0;
   display:inline-block;
-  transition:transform .35s cubic-bezier(.2,.7,.2,1);
+  transition: transform .35s cubic-bezier(.2,.7,.2,1);
 }
-.rooms .room-link:hover .room-cta{
-  opacity:1;
-  text-shadow: 0 0 12px rgba(144,72,72,.4);
-}
-.rooms .room-link:hover .room-cta::after{ transform:translateX(5px); }
+.rooms .room-link:hover .room-cta{ opacity:1; }
+.rooms .room-link:hover .room-cta::after{ transform: translateX(5px); }
 
 /* === Room detail page（room-sora/ki/ishi/tsuchi.html） === */
 .room-page{
