@@ -2459,9 +2459,15 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 }
 
 /* === 260520-3: Leaflet タイルを Vintage 風セピアに着色 ＋ コントロール調整 === */
+/* Positron(light_nolabels) ベース→ 暖色セピア＋コントラスト UP で読みやすく */
 .kaido-tiles{
-  /* CartoDB Voyager → 暖色セピア(Snazzy Vintage 似) */
-  filter: sepia(0.55) saturate(1.05) hue-rotate(-8deg) brightness(1.02) contrast(0.96);
+  filter: sepia(0.45) saturate(1.25) hue-rotate(-12deg) contrast(1.18) brightness(1.04);
+}
+/* ラベル層は薄く重ねて情報過多を回避（maroon寄りの薄文字に） */
+.kaido-tiles-labels{
+  filter: sepia(0.6) saturate(1.1) hue-rotate(-14deg) contrast(0.95) brightness(1.05);
+  opacity:.62;
+  mix-blend-mode:multiply;
 }
 .leaflet-container{
   background:#fbf9f4 !important;
