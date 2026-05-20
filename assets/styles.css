@@ -2742,12 +2742,19 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 }
 .rd-hero-photo{
   position:relative; margin:0;
-  width:88vw;
-  max-width:calc((100vh - 160px) * 16 / 9);   /* 縦に収まる16:9幅 */
-  aspect-ratio:16 / 9;
+  /* aspect-ratio は使わず、元写真の縦横比で表示（トリミングなし） */
+  max-width:88vw;
+  max-height:calc(100vh - 160px);
   overflow:hidden;
+  line-height:0;
 }
-.rd-hero-photo img{ display:block; width:100%; height:100%; object-fit:cover; }
+.rd-hero-photo img{
+  display:block;
+  max-width:88vw;
+  max-height:calc(100vh - 160px);
+  width:auto; height:auto;
+  object-fit:contain;
+}
 .rd-hero-photo::after{
   content:''; position:absolute; inset:0;
   background:linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.34) 100%);
