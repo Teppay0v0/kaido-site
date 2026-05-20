@@ -2458,6 +2458,12 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:block; width:100%; height:100%; object-fit:cover; border:0;
 }
 
+/* === 260520-6: ACCESS見出しをグリッド(1280)と同じ左端に揃える === */
+.access-home .rooms-header,
+.access-page .rooms-header{
+  max-width:1280px !important;
+}
+
 /* === 260520-5: 右情報の上に KAIDO ロゴ（maroon＝フッター背景色／2倍幅／左揃え） === */
 .access-home-brand{
   margin:0 0 40px; padding:0; text-align:left;
