@@ -2721,7 +2721,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .rd-img{ margin:0; overflow:hidden; background:#fbf9f4; }
 .rd-img img{ display:block; width:100%; height:100%; object-fit:cover; }
 
-/* === 260521-i: GALLERY ページ — ランダム配置 === */
+/* === 260521-j: GALLERY ページ — スクロール連動の落下スタッキング === */
 .gallery-head{
   background:#fff;
   padding:200px 80px 60px;
@@ -2731,39 +2731,38 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .gallery-head .rd-section-label{ margin-bottom:28px; }
 .gallery-head .rd-section-h{ font-size:clamp(36px,4.4vw,60px); }
 
-.gallery-scatter{
+/* スクロール用の縦長セクション。stage は sticky で固定 */
+.gallery-fall{
   position:relative;
   background:#fff;
-  width:100%;
-  max-width:1280px;
-  margin:0 auto;
-  padding:0 24px 200px;
-  overflow:visible;
-  min-height:1400px;
+  height:520vh;                  /* 5枚 × 約100vh の落下尺＋余韻 */
 }
-.gallery-scatter .g-card{
+.gallery-fall-stage{
+  position:sticky; top:0;
+  width:100%; height:100vh;
+  overflow:hidden;
+  background:#fff;
+}
+.gf-card{
   position:absolute;
   margin:0;
   width: var(--w, 400px);
-  box-shadow: 0 14px 56px rgba(0,0,0,.14);
+  left:  var(--rx, 50%);
+  top:   var(--ry, 50%);
+  box-shadow: 0 20px 64px rgba(0,0,0,.16);
   background:#fff;
-  cursor:pointer;
-  transition: transform 1s cubic-bezier(.2,.7,.2,1), box-shadow .55s ease;
+  opacity:0;
+  transform: translateY(-110vh);
+  will-change: transform, opacity;
 }
-.gallery-scatter .g-card img{
-  display:block;
-  width:100%; height:auto;
-}
-.gallery-scatter .g-card:hover{
-  transform: scale(1.04);
-  z-index:5;
-  box-shadow: 0 24px 72px rgba(0,0,0,.22);
+.gf-card img{
+  display:block; width:100%; height:auto;
 }
 
 @media (max-width:680px){
   .gallery-head{ padding:120px 24px 40px; }
-  .gallery-scatter{ padding:0 16px 120px; min-height:1200px; }
-  .gallery-scatter .g-card{ width: clamp(220px, var(--w, 320px), 78vw) !important; }
+  .gallery-fall{ height:480vh; }
+  .gf-card{ width: clamp(220px, var(--w, 320px), 76vw) !important; }
 }
 
 /* マウスオーバーで全サムネがふわっと拡大（Heroは別レイヤなので影響なし） */
