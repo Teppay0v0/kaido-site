@@ -2757,14 +2757,14 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 }
 .gf-card img{
   display:block;
-  max-width:42vw;              /* 62vw の約 2/3 */
-  max-height:48vh;             /* 72vh の約 2/3 */
-  width:auto; height:auto;
+  height:48vh;                 /* 全写真の高さを統一（縦位置も同じ高さに） */
+  width:auto;
+  max-width:60vw;              /* 横長すぎ防止の上限 */
   object-fit:contain;
 }
 
 @media (max-width:680px){
-  .gf-card img{ max-width:64vw; max-height:50vh; }
+  .gf-card img{ height:48vh; max-width:88vw; }
 }
 
 /* マウスオーバーで全サムネがふわっと拡大（Heroは別レイヤなので影響なし） */
