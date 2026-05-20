@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521o" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521p" />
 </head>
 <body>
 <!-- ============ HEADER ============ -->
@@ -34,14 +34,20 @@
   </div>
 </div>
 
-<!-- ============ GALLERY STACK — sticky stage + scroll で重なる ============ -->
+<!-- ============ GALLERY STACK — sticky stage + scroll で10枚が重なる ============ -->
 <section class="gallery-stack" id="galleryStack">
   <div class="gallery-stack-stage">
-    <figure class="gf-card" style="--ox:   0px; --oy:   0px"><img src="assets/images/philosophy_01.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--ox: 140px; --oy:  90px"><img src="assets/images/philosophy_02.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--ox:-130px; --oy: 130px"><img src="assets/images/philosophy_03.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--ox: 110px; --oy: -90px"><img src="assets/images/philosophy_04.jpg" alt="" /></figure>
-    <figure class="gf-card" style="--ox:-100px; --oy:  60px"><img src="assets/images/philosophy_05.jpg" alt="" /></figure>
+    <!-- 10枚の空figure。JSが pool 50枚からランダムに img.src と --ox/--oy を設定 -->
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
+    <figure class="gf-card"></figure>
   </div>
 </section>
 
@@ -83,19 +89,70 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521o" defer></script>
+<script src="assets/script.js?v=20260521p" defer></script>
 <script defer>
-/*  index の DECK と同じ "sticky stage + scroll進捗" 方式。
-    画面は固定（sticky）のまま、ホイール操作で進捗 p が動き、
-    1枚目はそのまま、2〜5枚目は scale 1.4→1.0 + opacity で順番に重なる。*/
+/* GALLERY: indexのDECKと同じ sticky stage 方式。
+   50枚プールから10枚をランダム選出、位置(--ox/--oy)もランダム。
+   1枚目から全てランダム。スクロールに応じて拡大→縮小で順に重なる。 */
 (function(){
+  const POOL = [
+    // SORA (4F) — index/rooms未使用
+    'sora/20260423_KAIDO_SORA_003.jpg','sora/20260423_KAIDO_SORA_011.jpg',
+    'sora/20260423_KAIDO_SORA_022.jpg','sora/20260423_KAIDO_SORA_025.jpg',
+    'sora/20260423_KAIDO_SORA_030.jpg','sora/20260423_KAIDO_SORA_052.jpg',
+    'sora/20260423_KAIDO_SORA_053.jpg','sora/20260423_KAIDO_SORA_054.jpg',
+    'sora/20260423_KAIDO_SORA_056.jpg','sora/20260423_KAIDO_SORA_058.jpg',
+    'sora/20260423_KAIDO_SORA_066.jpg','sora/20260423_KAIDO_SORA_068.jpg',
+    'sora/20260423_KAIDO_SORA_081.jpg','sora/20260423_KAIDO_SORA_117.jpg',
+    'sora/20260423_KAIDO_SORA_122.jpg','sora/20260423_KAIDO_SORA_125.jpg',
+    'sora/20260423_KAIDO_SORA_137.jpg','sora/20260423_KAIDO_SORA_384.jpg',
+    // KI (3F)
+    'ki/20260423_KAIDO_KI_207.jpg','ki/20260423_KAIDO_KI_210.jpg',
+    'ki/20260423_KAIDO_KI_213.jpg','ki/20260423_KAIDO_KI_295.jpg',
+    'ki/20260423_KAIDO_KI_300.jpg','ki/20260423_KAIDO_KI_305.jpg',
+    'ki/20260423_KAIDO_KI_313.jpg','ki/20260423_KAIDO_KI_320.jpg',
+    'ki/20260423_KAIDO_KI_325.jpg','ki/20260423_KAIDO_KI_330.jpg',
+    'ki/20260423_KAIDO_KI_345.jpg','ki/20260423_KAIDO_KI_350.jpg',
+    // ISHI (2F)
+    'ishi/20260423_KAIDO_ISHI_228.jpg','ishi/20260423_KAIDO_ISHI_235.jpg',
+    'ishi/20260423_KAIDO_ISHI_244.jpg','ishi/20260423_KAIDO_ISHI_252.jpg',
+    'ishi/20260423_KAIDO_ISHI_259.jpg','ishi/20260423_KAIDO_ISHI_263.jpg',
+    'ishi/20260423_KAIDO_ISHI_268.jpg','ishi/20260423_KAIDO_ISHI_272.jpg',
+    'ishi/20260423_KAIDO_ISHI_278.jpg','ishi/20260423_KAIDO_ISHI_281.jpg',
+    'ishi/20260423_KAIDO_ISHI_283.jpg','ishi/20260423_KAIDO_ISHI_284.jpg',
+    // TSUCHI (1F)
+    'tsuchi/20260423_KAIDO_TSUCHI_149.jpg','tsuchi/20260423_KAIDO_TSUCHI_155.jpg',
+    'tsuchi/20260423_KAIDO_TSUCHI_167.jpg','tsuchi/20260423_KAIDO_TSUCHI_174.jpg',
+    'tsuchi/20260423_KAIDO_TSUCHI_180.jpg','tsuchi/20260423_KAIDO_TSUCHI_188.jpg',
+    'tsuchi/20260423_KAIDO_TSUCHI_194.jpg','tsuchi/20260423_KAIDO_TSUCHI_195.jpg'
+  ];
+  // 注: 実体は assets/images/gallery/ に集約してあります
+  const BASE = 'assets/images/gallery/';
+
   function init(){
     const sec   = document.getElementById('galleryStack');
     if(!sec) return;
     const cards = Array.from(sec.querySelectorAll('.gf-card'));
     if(!cards.length) return;
 
-    const DRIVEN  = cards.length - 1;          // 2..N がスクロール駆動
+    // --- POOL からランダムに 10 枚選び、--ox/--oy もランダム化 ---
+    const shuffled = POOL.slice().sort(() => Math.random() - 0.5);
+    const picks = shuffled.slice(0, cards.length);
+    cards.forEach((card, i) => {
+      const filename = picks[i].split('/').pop();   // sora/xxx.jpg → xxx.jpg
+      card.innerHTML = `<img src="${BASE}${filename}" alt="" />`;
+      // 位置ランダム ±220px / ±150px(縦)。1枚目だけ中央寄せ(±60)
+      const range = i === 0 ? 60 : 220;
+      const rangeY = i === 0 ? 40 : 150;
+      const ox = (Math.random() * 2 - 1) * range;
+      const oy = (Math.random() * 2 - 1) * rangeY;
+      card.style.setProperty('--ox', ox.toFixed(0)+'px');
+      card.style.setProperty('--oy', oy.toFixed(0)+'px');
+      // z-index: 後発カードが上に
+      card.style.zIndex = String(i + 1);
+    });
+
+    const DRIVEN  = cards.length - 1;
     const OVERLAP = 0.18;
     const sliceLen = 1 / (DRIVEN - (DRIVEN - 1) * OVERLAP);
     const easeOut = t => 1 - Math.pow(1 - t, 2.4);
@@ -110,7 +167,6 @@
       const scrolled = Math.min(Math.max(-rect.top, 0), total);
       const p = total > 0 ? scrolled / total : 0;
 
-      // 1枚目は常時表示
       cards[0].style.opacity = '1';
       cards[0].style.transform = 'translate(-50%, -50%) scale(1)';
 
