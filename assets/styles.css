@@ -325,7 +325,7 @@ body.menu-open{overflow:hidden}
   will-change:clip-path;
 }
 .hero-layer.hero-base{
-  background-image:url("images/hero2-entrance.jpg");
+  background-image:url("images/hero2-entrance.jpg?v=20260520f");
   z-index:1;
 }
 .hero-layer.hero-front{
@@ -2292,11 +2292,13 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .hero-layer, .hero-vignette, .hero-overlay{
   inset:auto !important;
   position:absolute !important;
-  top:50% !important; left:50% !important;
+  /* ヘッダー(~94px固定)が上を覆うため、ボックスを header_height/2 = 47px 下へ
+     シフトして「見えるmaroon余白」を上下均等に。
+     box_top - header_height ＝ vh - box_bottom が成立する位置。 */
+  top:calc(50% + 47px) !important; left:50% !important;
   transform:translate(-50%,-50%) !important;
-  /* 横長 16:9。height=min(縦の余地, 横幅88vwで決まる高さ)。
-     top:50%+translate-50% で上下マージン数学的に均等。 */
-  height:min(calc(100vh - 160px), calc(88vw * 9 / 16)) !important;
+  /* 横長 16:9。height = min(縦の余地, 横幅88vwで決まる高さ) */
+  height:min(calc(100vh - 188px), calc(88vw * 9 / 16)) !important;
   aspect-ratio:16 / 9 !important;
 }
 
