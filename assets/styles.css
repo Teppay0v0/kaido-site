@@ -2826,6 +2826,68 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   opacity:1;
   animation: kaidoGlowSoft 1s ease-out;
 }
+
+/* ===== Gallery Lightbox ===== */
+.rd-lightbox{
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(15,12,10,.93);
+  display:flex; align-items:center; justify-content:center;
+  padding:5vh 5vw;
+  opacity:0; visibility:hidden;
+  transition:opacity .35s ease, visibility .35s;
+}
+.rd-lightbox.is-open{ opacity:1; visibility:visible; }
+.rd-lightbox-img{
+  max-width:92vw; max-height:90vh;
+  width:auto; height:auto;
+  display:block; object-fit:contain;
+  box-shadow:0 16px 64px rgba(0,0,0,.55);
+  transform:scale(.96);
+  transition:transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.rd-lightbox.is-open .rd-lightbox-img{ transform:scale(1); }
+.rd-lightbox-cap{
+  position:absolute; left:50%; bottom:32px;
+  transform:translateX(-50%);
+  color:#fbf9f4; font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  font-weight:700; font-size:12px; letter-spacing:.28em;
+  opacity:.82; text-align:center;
+}
+.rd-lightbox-close{
+  position:absolute; top:24px; right:28px;
+  width:48px; height:48px;
+  background:transparent; cursor:pointer;
+  border:1px solid rgba(251,249,244,.4);
+  border-radius:50%;
+  color:#fbf9f4; font-size:22px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .3s ease, border-color .3s ease;
+}
+.rd-lightbox-close:hover{
+  background:rgba(251,249,244,.12);
+  border-color:rgba(251,249,244,.7);
+}
+.rd-lightbox-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:52px; height:52px;
+  background:transparent; cursor:pointer;
+  border:1px solid rgba(251,249,244,.36);
+  border-radius:50%;
+  color:#fbf9f4; font-size:20px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .3s ease, border-color .3s ease;
+}
+.rd-lightbox-nav:hover{
+  background:rgba(251,249,244,.12); border-color:rgba(251,249,244,.7);
+}
+.rd-lightbox-prev{ left:32px; }
+.rd-lightbox-next{ right:32px; }
+@media (max-width:680px){
+  .rd-lightbox-nav{ width:40px; height:40px; font-size:16px; }
+  .rd-lightbox-prev{ left:12px; } .rd-lightbox-next{ right:12px; }
+  .rd-lightbox-close{ top:14px; right:14px; width:40px; height:40px; }
+  .rd-lightbox-cap{ font-size:11px; letter-spacing:.2em; }
+}
 .rd-gallery-grid figure > .rd-img,
 .rd-gallery-grid figure .rd-img{ /* in case nested */ }
 

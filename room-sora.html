@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521c" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521d" />
 </head>
 <body>
 <!-- HEADER -->
@@ -266,6 +266,69 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521c" defer></script>
+<script src="assets/script.js?v=20260521d" defer></script>
+<script defer>
+(function(){
+  function init(){
+    const figs = document.querySelectorAll('.rd-gallery-grid figure');
+    if(!figs.length) return;
+    const items = Array.from(figs).map(f => {
+      const img = f.querySelector('img');
+      const cap = f.querySelector('figcaption');
+      return { src: img && img.src, alt: img && img.alt, cap: cap && cap.textContent };
+    }).filter(o => o.src);
+
+    const lb = document.createElement('div');
+    lb.className = 'rd-lightbox';
+    lb.setAttribute('aria-hidden','true');
+    lb.innerHTML =
+      '<button class="rd-lightbox-close" aria-label="閉じる">×</button>' +
+      '<button class="rd-lightbox-nav rd-lightbox-prev" aria-label="前へ">‹</button>' +
+      '<button class="rd-lightbox-nav rd-lightbox-next" aria-label="次へ">›</button>' +
+      '<img class="rd-lightbox-img" alt="" />' +
+      '<div class="rd-lightbox-cap"></div>';
+    document.body.appendChild(lb);
+
+    const lbImg = lb.querySelector('.rd-lightbox-img');
+    const lbCap = lb.querySelector('.rd-lightbox-cap');
+    let idx = 0;
+
+    function show(i){
+      idx = (i + items.length) % items.length;
+      const it = items[idx];
+      lbImg.src = it.src;
+      lbImg.alt = it.alt || '';
+      lbCap.textContent = it.cap || '';
+    }
+    function open(i){
+      show(i);
+      lb.classList.add('is-open');
+      lb.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function close(){
+      lb.classList.remove('is-open');
+      lb.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    figs.forEach((f, i) => {
+      f.addEventListener('click', () => open(i));
+    });
+    lb.querySelector('.rd-lightbox-close').addEventListener('click', close);
+    lb.querySelector('.rd-lightbox-prev').addEventListener('click', e => { e.stopPropagation(); show(idx - 1); });
+    lb.querySelector('.rd-lightbox-next').addEventListener('click', e => { e.stopPropagation(); show(idx + 1); });
+    lb.addEventListener('click', e => { if(e.target === lb || e.target === lbImg) close(); });
+    document.addEventListener('keydown', e => {
+      if(!lb.classList.contains('is-open')) return;
+      if(e.key === 'Escape')     close();
+      if(e.key === 'ArrowLeft')  show(idx - 1);
+      if(e.key === 'ArrowRight') show(idx + 1);
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
 </body>
 </html>
