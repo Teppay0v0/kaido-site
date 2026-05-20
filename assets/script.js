@@ -124,10 +124,9 @@ function tick(){
     const eb = heroBase.getBoundingClientRect();
     const ew = eb.width  || window.innerWidth;
     const eh = eb.height || window.innerHeight;
-    const EAR = 2400 / 1861;                 // hero2(左14%軽トリミング・引きの画)の実アスペクト
-    // 間口(開口部)の中心を、画面比に依存せず常にボックス中央へ固定。
-    // 焦点(FX,FY)をボックス中心(0.5,0.5)に重ね、cover+余白ゼロを担保。
-    const FX = 0.47, FY = 0.58;              // 開口部中心(引きの画ver)
+    const EAR = 1800 / 1012;                 // hero2-entrance.jpg (008_2 / 16:9 タイトクロップ)
+    // タイトクロップで構図中心 = 間口中心。
+    const FX = 0.5, FY = 0.5;
     const TX = 0.5,   TY = 0.5;              // ボックス中央に置く
     const wCover  = ew;
     const wCoverH = eh * EAR;
