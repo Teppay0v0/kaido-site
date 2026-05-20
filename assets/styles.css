@@ -2305,17 +2305,17 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .header, .header.on-hero{
   padding:14px 44px !important;
 }
-/* ロゴサイズもスクロール状態に依存させない（PDF仕様の34px固定） */
+/* ロゴサイズはスクロール状態に依存させず、1.5倍に */
 .header .logo-img,
 .header.scrolled .logo-img,
 .header.on-hero .logo-img{
-  height:34px !important;
+  height:51px !important;          /* 34 * 1.5 */
 }
 @media (max-width:680px){
   .header .logo-img,
   .header.scrolled .logo-img,
   .header.on-hero .logo-img{
-    height:26px !important;
+    height:39px !important;        /* 26 * 1.5 */
   }
 }
 
