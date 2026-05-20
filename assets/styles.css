@@ -2752,9 +2752,16 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   box-shadow: 0 20px 64px rgba(0,0,0,.16);
   background:#fff;
   opacity:0;
-  transform: translateY(-110vh);
+  transform: scale(1.4);
+  transform-origin: center center;
   will-change: transform, opacity;
 }
+/* 後から来るカードほど上に重なる */
+.gf-card:nth-child(1){ z-index:1; }
+.gf-card:nth-child(2){ z-index:2; }
+.gf-card:nth-child(3){ z-index:3; }
+.gf-card:nth-child(4){ z-index:4; }
+.gf-card:nth-child(5){ z-index:5; }
 .gf-card img{
   display:block; width:100%; height:auto;
 }
