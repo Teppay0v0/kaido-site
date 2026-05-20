@@ -2461,10 +2461,18 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:block; width:100%; height:100%; object-fit:cover; border:0;
 }
 
-/* === 260520-6: ACCESS見出しをNEWS/グリッド(1180)と同じ幅に揃える === */
-.access-home .rooms-header,
-.access-page .rooms-header{
+/* === 260520-6: ACCESS見出しとグリッドの左右端を完全一致（強制） === */
+.access-home > .rooms-header,
+.access-home > .access-home-grid,
+.access-page > .rooms-header,
+.access-page > .access-home-grid{
   max-width:1180px !important;
+  width:100% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  padding-left:0 !important;
+  padding-right:0 !important;
+  box-sizing:border-box !important;
 }
 
 /* === 260520-5: 右情報の上に KAIDO ロゴ（maroon＝フッター背景色／2倍幅／左揃え） === */
