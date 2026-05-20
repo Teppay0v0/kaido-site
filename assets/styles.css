@@ -2292,14 +2292,18 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .hero-layer, .hero-vignette, .hero-overlay{
   inset:auto !important;
   position:absolute !important;
-  /* ヘッダー(~94px固定)が上を覆うため、ボックスを header_height/2 = 47px 下へ
-     シフトして「見えるmaroon余白」を上下均等に。
-     box_top - header_height ＝ vh - box_bottom が成立する位置。 */
-  top:calc(50% + 47px) !important; left:50% !important;
+  /* ヘッダー(常時14px paddingで~78px)が上を覆うため、box を header/2≈40px 下へ
+     シフトして「見えるmaroon余白」を上下均等に。 */
+  top:calc(50% + 40px) !important; left:50% !important;
   transform:translate(-50%,-50%) !important;
   /* 横長 16:9。height = min(縦の余地, 横幅88vwで決まる高さ) */
-  height:min(calc(100vh - 188px), calc(88vw * 9 / 16)) !important;
+  height:min(calc(100vh - 160px), calc(88vw * 9 / 16)) !important;
   aspect-ratio:16 / 9 !important;
+}
+
+/* === 260520-7: ヘッダーをスクロール位置に依らず常に「scrolled」サイズに === */
+.header, .header.on-hero{
+  padding:14px 44px !important;
 }
 
 /* === 260519-3: フッターの不要な横線を完全除去 === */
