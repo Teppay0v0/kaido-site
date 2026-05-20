@@ -2590,6 +2590,27 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   position:relative; z-index:2;  /* 隣接要素より前へ */
 }
 
+/* ホバー中だけ写真右下に "MORE →" を表示 */
+.rooms .room-photo{ position:relative; }
+.rooms .room-photo::after{
+  content:'MORE  →';
+  position:absolute;
+  right:20px; bottom:18px;
+  color:#fff; font-weight:700;
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  font-size:11px; letter-spacing:.32em;
+  text-shadow:0 1px 12px rgba(0,0,0,.45), 0 0 6px rgba(0,0,0,.3);
+  opacity:0;
+  transform: translateX(-10px);
+  transition: opacity .5s ease, transform .55s cubic-bezier(.2,.7,.2,1);
+  pointer-events:none;
+  z-index:3;
+}
+.rooms .room-link:hover .room-photo::after{
+  opacity:1;
+  transform: translateX(0);
+}
+
 /* テキスト：ホバーした瞬間に一度だけ光って消える（keyframe再生） */
 @keyframes kaidoGlowBig {
   0%   { text-shadow: none; }
