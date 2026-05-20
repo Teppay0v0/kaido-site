@@ -2458,16 +2458,15 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:block; width:100%; height:100%; object-fit:cover; border:0;
 }
 
-/* === 260520-3: Leaflet タイルを Vintage 風セピアに着色 ＋ コントロール調整 === */
-/* Positron(light_nolabels) ベース→ 暖色セピア＋コントラスト UP で読みやすく */
+/* === 260520-3: Leaflet タイルを暖色ブランド色に微調整（コントラスト最優先） === */
+/* 強いセピア廃止 → 軽い暖色シフト＋コントラスト UP で建物/道路がはっきり見える */
 .kaido-tiles{
-  filter: sepia(0.45) saturate(1.25) hue-rotate(-12deg) contrast(1.18) brightness(1.04);
-}
-/* ラベル層は薄く重ねて情報過多を回避（maroon寄りの薄文字に） */
-.kaido-tiles-labels{
-  filter: sepia(0.6) saturate(1.1) hue-rotate(-14deg) contrast(0.95) brightness(1.05);
-  opacity:.62;
-  mix-blend-mode:multiply;
+  filter:
+    sepia(0.18)
+    saturate(0.85)
+    hue-rotate(-10deg)
+    contrast(1.22)
+    brightness(0.96);
 }
 .leaflet-container{
   background:#fbf9f4 !important;

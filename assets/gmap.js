@@ -53,25 +53,16 @@ function loadScript(src){
     keyboard: false
   });
 
-  // CartoDB Positron (light_all): モノクロ・低ノイズ・編集デザイン向け
-  // ラベル無しベース → 上に薄くラベルを重ねて読みやすさを担保
+  // CartoDB Voyager: 建物・道路・ラベルが揃った詳細ベース
   L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
         '&copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19,
-      className: 'kaido-tiles'   // CSSでセピア＆コントラスト調整
-    }
-  ).addTo(map);
-  // 主要ラベルだけ別レイヤーで薄く（情報過多を回避）
-  L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-    {
-      subdomains: 'abcd', maxZoom: 19,
-      className: 'kaido-tiles-labels'
+      className: 'kaido-tiles'   // CSSでブランド色化（コントラスト維持）
     }
   ).addTo(map);
 
