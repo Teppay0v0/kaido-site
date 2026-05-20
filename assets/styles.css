@@ -2467,12 +2467,20 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   .access-page{ padding:120px 24px 100px !important; }
 }
 
-/* === 260520-2: Google Maps コンテナ（カスタムスタイル / SVGフォールバック対応） === */
+/* === 260520-2: Mapコンテナ — 右情報の高さに合わせて伸縮 === */
+.access-home-grid{ align-items:stretch !important; }
+.access-home-map{
+  margin:0; position:relative; min-height:0;
+  /* グリッドの行高に追随（情報列の自然高に合わせて伸びる） */
+  height:100%;
+}
 .access-home-map .kaido-map{
-  width:100%; aspect-ratio:3 / 2;     /* 4:3→3:2 で約50px短く（縦長過ぎを解消） */
+  position:absolute; inset:0;            /* 親figureの実寸を完全フィル */
+  width:auto; height:auto;
   border:1px solid rgba(144,72,72,.18);
   background:#fbf9f4;
-  position:relative; overflow:hidden;
+  overflow:hidden;
+  /* aspect-ratio は使わない → 情報列の高さに従う */
 }
 .access-home-map .kaido-map > img{
   display:block; width:100%; height:100%; object-fit:cover; border:0;
@@ -2524,28 +2532,31 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   background:#fbf9f4 !important;
 }
 
-/* マーカー：maroonドット＋白縁 */
+/* マーカーラップ：ラベル＋ドットを一体化（popup tip無し→▼矢印が出ない） */
+.kaido-marker-wrap{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  pointer-events:none;
+}
+.kaido-marker-wrap--sub{ gap:4px; }
+
+/* maroonドット */
 .kaido-marker{
-  width:20px; height:20px; border-radius:50%;
+  display:block;
+  width:18px; height:18px; border-radius:50%;
   background:#904848; border:3px solid #ffffff;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
-  cursor:pointer;
-  transform:translateY(2px);
 }
 .kaido-marker--sub{
-  width:13px; height:13px; background:#fbf9f4; border:2px solid #904848;
+  width:12px; height:12px; background:#fbf9f4; border:2px solid #904848;
   box-shadow:0 1px 4px rgba(0,0,0,.15);
 }
 
-/* 常時表示ポップアップ：ブランドタグ風 */
-.kaido-pop-wrap .maplibregl-popup-content{
-  background:transparent !important; box-shadow:none !important; padding:0 !important;
-}
-.kaido-pop-wrap .maplibregl-popup-tip{ display:none !important; }
+/* ラベル（maroonタグ）— popupではなくマーカー要素内に直接 */
 .kaido-pop{
   display:inline-block;
   background:#904848; color:#fbf9f4;
   padding:6px 12px; border-radius:2px;
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
   font-weight:700; letter-spacing:.22em; font-size:11px;
   white-space:nowrap;
 }
@@ -2553,3 +2564,6 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   background:#fbf9f4; color:#904848; border:1px solid #904848;
   font-size:10px; letter-spacing:.2em; padding:4px 10px;
 }
+
+/* もし maplibre 由来のtipが残っていても完全に隠す（保険） */
+.maplibregl-popup-tip{ display:none !important; }

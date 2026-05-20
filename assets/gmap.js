@@ -51,26 +51,33 @@ function loadScript(src){
   map.addControl(new maplibregl.NavigationControl({ showCompass:false }), 'top-left');
 
   map.on('load', () => {
-    // ホテルマーカー (maroon ドット + 常時ラベル)
-    const k = document.createElement('div');
-    k.className = 'kaido-marker';
-    new maplibregl.Marker({ element: k, anchor:'bottom' })
+    // ホテルマーカー：ラベル＋ドットを1要素にまとめ、popup(▼tip)は使わない
+    const kEl = document.createElement('div');
+    kEl.className = 'kaido-marker-wrap';
+    kEl.innerHTML =
+      '<span class="kaido-pop">開土 KAIDO</span>' +
+      '<span class="kaido-marker"></span>';
+    new maplibregl.Marker({ element: kEl, anchor:'bottom' })
       .setLngLat([KAIDO_LATLNG.lng, KAIDO_LATLNG.lat])
-      .setPopup(new maplibregl.Popup({
-        closeButton:false, closeOnClick:false, offset:14, className:'kaido-pop-wrap'
-      }).setHTML('<span class="kaido-pop">開土 KAIDO</span>'))
-      .addTo(map)
-      .togglePopup();
+      .addTo(map);
 
-    // 札幌駅マーカー
-    const s = document.createElement('div');
-    s.className = 'kaido-marker kaido-marker--sub';
-    new maplibregl.Marker({ element: s, anchor:'bottom' })
+    // 札幌駅マーカー：ドット＋ラベル(下側)。同様に popup なし。
+    const sEl = document.createElement('div');
+    sEl.className = 'kaido-marker-wrap kaido-marker-wrap--sub';
+    sEl.innerHTML =
+      '<span class="kaido-marker kaido-marker--sub"></span>' +
+      '<span class="kaido-pop kaido-pop--sub">JR 札幌駅</span>';
+    new maplibregl.Marker({ element: sEl, anchor:'top' })
       .setLngLat([SAPPORO_STATION.lng, SAPPORO_STATION.lat])
-      .setPopup(new maplibregl.Popup({
-        closeButton:false, closeOnClick:false, offset:10, className:'kaido-pop-wrap'
-      }).setHTML('<span class="kaido-pop kaido-pop--sub">JR 札幌駅</span>'))
-      .addTo(map)
-      .togglePopup();
+      .addTo(map);
+
+    // 念のためマップサイズを再計算（grid stretchによる高さ変化への追随）
+    setTimeout(() => map.resize(), 50);
   });
+
+  // 親コンテナのリサイズに追随
+  if(window.ResizeObserver){
+    const ro = new ResizeObserver(() => { try{ map.resize(); }catch(e){} });
+    ro.observe(el);
+  }
 })();
