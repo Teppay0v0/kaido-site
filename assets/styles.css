@@ -2458,16 +2458,17 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:block; width:100%; height:100%; object-fit:cover; border:0;
 }
 
-/* === 260520-5: 右情報の上に KAIDO ロゴ（ヘッダー同色 = 黒） === */
-.access-home-brand{ margin:0 0 36px; }
+/* === 260520-5: 右情報の上に KAIDO ロゴ（maroon＝フッター背景色／2倍幅／左揃え） === */
+.access-home-brand{
+  margin:0 0 40px; padding:0; text-align:left;
+}
 .access-home-brand img{
-  display:block; height:36px; width:auto;
-  filter:brightness(0); opacity:.92;   /* ヘッダーのロゴと同じ処理 */
-  max-width:none;
+  display:block; margin:0;
+  height:72px; width:auto; max-width:none;   /* 横幅およそ2倍 */
 }
 @media (max-width:680px){
   .access-home-brand{ margin:0 0 28px; }
-  .access-home-brand img{ height:30px; }
+  .access-home-brand img{ height:56px; }
 }
 
 /* === 260520-4: MapLibre + OpenFreeMap（ベクター・要素別配色） === */
