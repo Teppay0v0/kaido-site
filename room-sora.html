@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260520r" />
+<link rel="stylesheet" href="assets/styles.css?v=20260520s" />
 </head>
 <body>
 <!-- HEADER -->
@@ -39,39 +39,186 @@
   </div>
 </div>
 
-<!-- ROOM DETAIL -->
-<section class="room-page" id="room">
-  <figure class="room-page-hero">
-    <img src="assets/images/room_04_sora.jpg" alt="空 SORA" loading="lazy" />
+<!-- ============ 1. HERO ============ -->
+<section class="rd-hero">
+  <figure class="rd-hero-photo">
+    <img src="assets/images/room_04_sora.jpg" alt="空 SORA" />
   </figure>
+  <div class="rd-hero-overlay">
+    <span class="rd-hero-floor">4F</span>
+    <span class="rd-hero-kanji">空</span>
+    <span class="rd-hero-en">SORA</span>
+  </div>
+</section>
 
-  <div class="room-page-header">
-    <div class="room-page-kanji">空</div>
-    <div class="room-page-meta">
-      <h1 class="rooms-title room-page-title">SORA</h1>
-      <p class="rooms-subtitle">4F／屋上テラス付きデザイナーズ空間。</p>
+<!-- ============ 2. CONCEPT ============ -->
+<section class="rd-section rd-concept">
+  <div class="rd-concept-intro">
+    <p class="rd-theme">4F — SORA</p>
+    <h2 class="rd-concept-h">空に近い、最上階の隠れ家。</h2>
+    <p class="rd-lead">
+      ここにテキストが入ります。フロアテーマ「空」の世界観を伝えるテキスト。<br/>
+      屋上テラス付きのデザイナーズ空間で、街と空を借景に過ごす、最上階だけの時間。
+      なぜ「空」なのか、どのような素材・色調で空間が構成されているか、滞在するとどのような感覚を得られるか。
+    </p>
+  </div>
+  <div class="rd-concept-images">
+    <figure class="rd-img"><img src="assets/images/philosophy_01.jpg" alt="" loading="lazy" /></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_05.jpg" alt="" loading="lazy" /></figure>
+  </div>
+</section>
+
+<!-- ============ 3. SPACES ============ -->
+<section class="rd-section rd-spaces">
+  <header class="rd-section-head">
+    <p class="rd-section-label">— SPACES —</p>
+    <h2 class="rd-section-h">空間紹介</h2>
+  </header>
+
+  <div class="rd-space">
+    <figure class="rd-img rd-space-main"><img src="assets/images/room_04_sora.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">LIVING &amp; DINING</p>
+      <h3 class="rd-space-h">リビング・ダイニング</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。空間の広さ、窓からの光の入り方、家具の配置、何人でどのように過ごせるか。素材を生かした穏やかな色調と、街並みを望む大開口の組み合わせ。
+      </p>
+      <div class="rd-space-sub">
+        <figure class="rd-img"><img src="assets/images/philosophy_03.jpg" alt="" loading="lazy" /></figure>
+        <figure class="rd-img"><img src="assets/images/philosophy_04.jpg" alt="" loading="lazy" /></figure>
+      </div>
     </div>
   </div>
 
-  <div class="room-page-body">
-    <p class="room-page-lead">
-      ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。<br/>
-      ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。
-    </p>
+  <div class="rd-space rd-space--reverse">
+    <figure class="rd-img rd-space-main"><img src="assets/images/philosophy_02.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">KITCHEN</p>
+      <h3 class="rd-space-h">キッチン</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。カウンターキッチンの仕様、調理器具・食器類、IHコンロや冷蔵庫の設備。グループでの料理体験としての魅力。
+      </p>
+      <div class="rd-space-sub">
+        <figure class="rd-img"><img src="assets/images/philosophy_06.jpg" alt="" loading="lazy" /></figure>
+        <figure class="rd-img"><img src="assets/images/philosophy_07.jpg" alt="" loading="lazy" /></figure>
+      </div>
+    </div>
   </div>
 
-  <dl class="access-dl room-page-spec">
-    <div><dt>FLOOR</dt><dd>4F</dd></div>
-    <div><dt>CAPACITY</dt><dd>定員 8名</dd></div>
-    <div><dt>AMENITY</dt><dd>屋上テラス／全室サウナ</dd></div>
-    <div><dt>VIEW</dt><dd>札幌の街並み・北の空</dd></div>
-  </dl>
-
-  <div class="rooms-reserve">
-    <a href="access.html#reserve" class="reserve-btn reserve-btn--solid">RESERVE</a>
+  <div class="rd-space">
+    <figure class="rd-img rd-space-main"><img src="assets/images/philosophy_03.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">BEDROOM</p>
+      <h3 class="rd-space-h">ベッドルーム</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。ベッドの構成（タイプ・台数）、寝具のクオリティ、遮光性、空間の静けさ。就寝環境としての快適さ。
+      </p>
+    </div>
   </div>
 
-  <nav class="room-page-nav">
+  <div class="rd-space rd-space--reverse">
+    <figure class="rd-img rd-space-main"><img src="assets/images/philosophy_04.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">BATHROOM</p>
+      <h3 class="rd-space-h">バスルーム</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。浴室の広さ・仕様、シャワー、洗面台、バスアメニティの内容。
+      </p>
+    </div>
+  </div>
+
+  <div class="rd-space">
+    <figure class="rd-img rd-space-main"><img src="assets/images/philosophy_05.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">PRIVATE SAUNA</p>
+      <h3 class="rd-space-h">プライベートサウナ</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。サウナの仕様（温度・広さ）、屋上テラスでの外気浴への導線。プライベート空間で楽しむサウナ体験。
+      </p>
+    </div>
+  </div>
+
+  <div class="rd-space rd-space--reverse">
+    <figure class="rd-img rd-space-main"><img src="assets/images/philosophy_06.jpg" alt="" loading="lazy" /></figure>
+    <div class="rd-space-text">
+      <p class="rd-space-en">ROOFTOP TERRACE</p>
+      <h3 class="rd-space-h">屋上テラス</h3>
+      <p class="rd-body">
+        ここにテキストが入ります。屋上テラスの広さ、サウナ後の外気浴としての使い方、札幌の街と空を眺める屋外空間。SORAだけの特別な眺望。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. GALLERY ============ -->
+<section class="rd-section rd-gallery">
+  <header class="rd-section-head">
+    <p class="rd-section-label">— GALLERY —</p>
+    <h2 class="rd-section-h">Gallery</h2>
+  </header>
+  <div class="rd-gallery-grid">
+    <figure class="rd-img"><img src="assets/images/room_04_sora.jpg" alt="" loading="lazy" /><figcaption>リビングから望む空間</figcaption></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_03.jpg" alt="" loading="lazy" /><figcaption>寝室の設え</figcaption></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_04.jpg" alt="" loading="lazy" /><figcaption>サウナ・バスエリア</figcaption></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_02.jpg" alt="" loading="lazy" /><figcaption>カウンターキッチン</figcaption></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_01.jpg" alt="" loading="lazy" /><figcaption>素材のクローズアップ</figcaption></figure>
+    <figure class="rd-img"><img src="assets/images/philosophy_07.jpg" alt="" loading="lazy" /><figcaption>屋上テラスからの眺望</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 5. AMENITIES ============ -->
+<section class="rd-section rd-amenities">
+  <header class="rd-section-head">
+    <p class="rd-section-label">— AMENITIES &amp; EQUIPMENT —</p>
+    <h2 class="rd-section-h">アメニティ・設備</h2>
+  </header>
+  <ul class="rd-amenities-list">
+    <li>プライベートサウナ</li>
+    <li>屋上テラス</li>
+    <li>カウンターキッチン</li>
+    <li>IHコンロ</li>
+    <li>冷蔵庫</li>
+    <li>電子レンジ</li>
+    <li>洗濯機</li>
+    <li>エアコン</li>
+    <li>Wi-Fi</li>
+    <li>テレビ</li>
+    <li>バスタオル</li>
+    <li>シャンプー・ボディソープ</li>
+    <li>ドライヤー</li>
+    <li>各種調理器具・食器</li>
+  </ul>
+</section>
+
+<!-- ============ 6. ROOM SPEC ============ -->
+<section class="rd-section rd-specs">
+  <header class="rd-section-head">
+    <p class="rd-section-label">— ROOM SPEC —</p>
+    <h2 class="rd-section-h">部屋情報</h2>
+  </header>
+  <div class="rd-specs-grid">
+    <table class="rd-specs-table">
+      <tbody>
+        <tr><th>FLOOR</th><td>4F</td></tr>
+        <tr><th>定員</th><td>8名</td></tr>
+        <tr><th>広さ</th><td>—㎡（仮）</td></tr>
+        <tr><th>ベッド</th><td>構成情報（仮）</td></tr>
+        <tr><th>チェックイン</th><td>15:00 〜</td></tr>
+        <tr><th>チェックアウト</th><td>〜 11:00</td></tr>
+        <tr><th>VIEW</th><td>札幌の街並み・北の空</td></tr>
+      </tbody>
+    </table>
+    <figure class="rd-floorplan">
+      <div class="rd-floorplan-ph">FLOOR PLAN ／ 間取り図（後日差し替え）</div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 7. CTA ============ -->
+<section class="rd-section rd-cta">
+  <a href="access.html#reserve" class="reserve-btn reserve-btn--solid rd-cta-btn">この部屋を予約する</a>
+  <p class="rd-cta-note">外部予約サービスに遷移します</p>
+  <nav class="rd-back-nav">
     <a class="room-page-back" href="index.html#rooms">← ALL ROOMS</a>
   </nav>
 </section>
@@ -112,6 +259,6 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260520r" defer></script>
+<script src="assets/script.js?v=20260520s" defer></script>
 </body>
 </html>
