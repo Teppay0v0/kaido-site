@@ -2780,6 +2780,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .rd-space-sub{
   display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px;
 }
+.rd-space-sub--one{ grid-template-columns:1fr; }
 .rd-space-sub .rd-img{ aspect-ratio:4/3; }
 
 /* ---------- 4. GALLERY ---------- */
