@@ -2457,3 +2457,37 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .access-home-map .kaido-map > img{
   display:block; width:100%; height:100%; object-fit:cover; border:0;
 }
+
+/* === 260520-3: Leaflet タイルを Vintage 風セピアに着色 ＋ コントロール調整 === */
+.kaido-tiles{
+  /* CartoDB Voyager → 暖色セピア(Snazzy Vintage 似) */
+  filter: sepia(0.55) saturate(1.05) hue-rotate(-8deg) brightness(1.02) contrast(0.96);
+}
+.leaflet-container{
+  background:#fbf9f4 !important;
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+}
+.leaflet-control-zoom{
+  border:1px solid rgba(144,72,72,.22) !important;
+  box-shadow:none !important;
+}
+.leaflet-control-zoom a{
+  background:#fbf9f4 !important; color:#904848 !important;
+  border-bottom:1px solid rgba(144,72,72,.18) !important;
+  font-weight:700;
+}
+.leaflet-control-zoom a:hover{ background:#f3efe7 !important; }
+.leaflet-control-attribution{
+  background:rgba(251,249,244,.85) !important;
+  color:#7a5a5a !important;
+  font-size:10px; letter-spacing:.04em;
+  padding:2px 8px;
+}
+.leaflet-control-attribution a{ color:#904848 !important; }
+.kaido-tip{
+  background:#904848 !important; color:#fbf9f4 !important;
+  border:0 !important; box-shadow:none !important;
+  padding:6px 12px !important;
+  font-weight:700; letter-spacing:.22em; font-size:11px;
+}
+.kaido-tip::before{ border-top-color:#904848 !important; }
