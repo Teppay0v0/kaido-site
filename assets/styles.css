@@ -2568,18 +2568,50 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 /* もし maplibre 由来のtipが残っていても完全に隠す（保険） */
 .maplibregl-popup-tip{ display:none !important; }
 
-/* === 260520-8: Roomsの各行を詳細ページへのリンク化（控えめ） === */
+/* === 260520-8: Roomsリンク化 + hover演出（ふわっと光る＋写真がわずかに拡大） === */
 .rooms .room-link{
   text-decoration:none; color:inherit;
   cursor:pointer;
 }
+
+/* 写真は img を内側に持ち、外枠で clip、img を scale で拡大 */
+.rooms .room-photo{
+  overflow:hidden;
+  background:none;
+}
+.rooms .room-photo img{
+  display:block; width:100%; height:100%;
+  object-fit:cover; object-position:center;
+  transition: transform 1.1s cubic-bezier(.2,.7,.2,1), filter .9s ease;
+  will-change: transform;
+}
+.rooms .room-link:hover .room-photo img{
+  transform: scale(1.045);
+  filter: brightness(1.02);
+}
+
+/* テキストはふわっと光る（maroonのソフトグロウ＋わずかに濃く） */
+.rooms .room-kanji,
+.rooms .room-meta,
+.rooms .room-desc,
+.rooms .room-link .room-cta{
+  transition: text-shadow .55s ease, color .45s ease, opacity .45s ease;
+}
+.rooms .room-link:hover .room-kanji{
+  text-shadow: 0 0 22px rgba(144,72,72,.45), 0 0 6px rgba(144,72,72,.25);
+}
+.rooms .room-link:hover .room-meta,
+.rooms .room-link:hover .room-desc{
+  text-shadow: 0 0 12px rgba(144,72,72,.28);
+}
+
+/* CTA「DETAILS →」: 控えめだが分かるサイン */
 .rooms .room-link .room-cta{
   margin-top:18px;
   display:inline-flex; align-items:center; gap:8px;
   color:var(--maroon); font-weight:700;
   font-size:11px; letter-spacing:.32em;
-  opacity:.85;
-  transition:opacity .35s ease;
+  opacity:.82;
 }
 .rooms .room-link .room-cta::after{
   content:'→';
@@ -2587,11 +2619,11 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:inline-block;
   transition:transform .35s cubic-bezier(.2,.7,.2,1);
 }
-.rooms .room-link:hover .room-cta{ opacity:1; }
+.rooms .room-link:hover .room-cta{
+  opacity:1;
+  text-shadow: 0 0 12px rgba(144,72,72,.4);
+}
 .rooms .room-link:hover .room-cta::after{ transform:translateX(5px); }
-/* 写真は ごく僅か な opacity だけ動かす（zoom等は入れない） */
-.rooms .room-photo{ transition:opacity .5s ease; }
-.rooms .room-link:hover .room-photo{ opacity:.94; }
 
 /* === Room detail page（room-sora/ki/ishi/tsuchi.html） === */
 .room-page{
