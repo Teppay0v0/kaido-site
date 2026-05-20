@@ -2731,31 +2731,38 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .gallery-head .rd-section-label{ margin-bottom:28px; }
 .gallery-head .rd-section-h{ font-size:clamp(36px,4.4vw,60px); }
 
-/* GALLERY: スクロール無し・自動再生で5枚が重なる */
+/* GALLERY: indexのDECKと同じ sticky stage 方式。
+   写真はindex DECKと同じ 62vw/72vh の大きさ、5枚が重なって落ちてくる。 */
 .gallery-stack{
   position:relative;
+  height:500vh;                /* 5枚分のスクロール尺 */
   background:#fff;
-  padding:40px 24px 120px;
 }
-.gallery-stack-area{
-  position:relative;
-  width:100%;
-  max-width:1180px;
-  margin:0 auto;
-  height:640px;                /* 5枚分のレイアウト領域 */
+.gallery-stack-stage{
+  position:sticky; top:0;
+  width:100%; height:100vh;
+  overflow:hidden;
+  background:#fff;
 }
 .gf-card{
   position:absolute;
   margin:0;
-  width:460px;                 /* indexのROOMS写真と同じ460pxに統一 */
-  left: var(--rx, 22%);
-  top:  var(--ry, 20%);
-  box-shadow: 0 20px 64px rgba(0,0,0,.16);
-  background:#fff;
-  opacity:0;
-  transform: scale(1.4);
+  /* 中央 + 微オフセット(--ox/--oy)で重なり感を出す */
+  top:  calc(50% + var(--oy, 0px));
+  left: calc(50% + var(--ox, 0px));
+  transform: translate(-50%, -50%) scale(1.4);
   transform-origin: center center;
+  opacity:0;
+  box-shadow: 0 24px 72px rgba(0,0,0,.18);
+  background:#fff;
   will-change: transform, opacity;
+}
+.gf-card img{
+  display:block;
+  max-width:62vw;              /* indexのDECK写真と同サイズ */
+  max-height:72vh;
+  width:auto; height:auto;
+  object-fit:contain;
 }
 /* 後から来るカードほど上に重なる */
 .gf-card:nth-child(1){ z-index:1; }
@@ -2763,17 +2770,10 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .gf-card:nth-child(3){ z-index:3; }
 .gf-card:nth-child(4){ z-index:4; }
 .gf-card:nth-child(5){ z-index:5; }
-.gf-card img{ display:block; width:100%; height:auto; }
 
-@media (max-width:900px){
-  .gallery-stack-area{ height:560px; }
-  .gf-card{ width: min(420px, 70vw); }
-}
 @media (max-width:680px){
   .gallery-head{ padding:120px 24px 40px; }
-  .gallery-stack{ padding:24px 16px 80px; }
-  .gallery-stack-area{ height:460px; }
-  .gf-card{ width:78vw; }
+  .gf-card img{ max-width:86vw; max-height:64vh; }
 }
 
 /* マウスオーバーで全サムネがふわっと拡大（Heroは別レイヤなので影響なし） */
