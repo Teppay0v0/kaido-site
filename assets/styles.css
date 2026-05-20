@@ -2788,14 +2788,23 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 .rd-gallery-grid{
   display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
 }
+.rd-gallery-grid figure{ margin:0; position:relative; cursor:pointer; }
 .rd-gallery-grid .rd-img{
   aspect-ratio:1/1; position:relative;
+  transition: transform 1s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
 }
+.rd-gallery-grid figure:hover{ z-index:2; }
+.rd-gallery-grid figure:hover .rd-img{ transform: scale(1.045); }
 .rd-gallery-grid figcaption{
   color:var(--maroon); font-weight:700; font-size:11px;
   letter-spacing:.18em; margin-top:10px; opacity:.78;
+  transition: opacity .45s ease;
 }
-.rd-gallery-grid figure{ margin:0; }
+.rd-gallery-grid figure:hover figcaption{
+  opacity:1;
+  animation: kaidoGlowSoft 1s ease-out;
+}
 .rd-gallery-grid figure > .rd-img,
 .rd-gallery-grid figure .rd-img{ /* in case nested */ }
 
