@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521r" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521s" />
 </head>
 <body>
 <!-- ============ HEADER ============ -->
@@ -91,7 +91,7 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521r" defer></script>
+<script src="assets/script.js?v=20260521s" defer></script>
 <script defer>
 /* GALLERY: indexのDECKと同じ sticky stage 方式。
    50枚プールから10枚をランダム選出、位置(--ox/--oy)もランダム。
@@ -143,6 +143,11 @@
     cards.forEach((card, i) => {
       const filename = picks[i].split('/').pop();   // sora/xxx.jpg → xxx.jpg
       card.innerHTML = `<img src="${BASE}${filename}" alt="" />`;
+      // 縦位置の写真は別ルール(width:48vh)で横位置と同サイズ感に
+      const img = card.querySelector('img');
+      img.addEventListener('load', () => {
+        if(img.naturalHeight > img.naturalWidth) card.classList.add('gf-portrait');
+      });
       // 位置ランダム ±220px / ±150px(縦)。1枚目だけ中央寄せ(±60)
       const range = i === 0 ? 60 : 220;
       const rangeY = i === 0 ? 40 : 150;

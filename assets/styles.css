@@ -2755,16 +2755,25 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   background:#fff;
   will-change: transform, opacity;
 }
+/* 横位置: 高さ 48vh 基準（幅は自然な aspect で決まる） */
 .gf-card img{
   display:block;
-  height:48vh;                 /* 全写真の高さを統一（縦位置も同じ高さに） */
+  height:48vh;
   width:auto;
-  max-width:60vw;              /* 横長すぎ防止の上限 */
+  max-width:62vw;
   object-fit:contain;
+}
+/* 縦位置: 横位置を90度回転したサイズ感に統一（幅=48vh、高さは aspect 由来） */
+.gf-card.gf-portrait img{
+  height:auto;
+  width:48vh;
+  max-width:none;
+  max-height:78vh;
 }
 
 @media (max-width:680px){
-  .gf-card img{ height:48vh; max-width:88vw; }
+  .gf-card img{ height:42vh; max-width:88vw; }
+  .gf-card.gf-portrait img{ width:42vh; max-height:70vh; }
 }
 
 /* マウスオーバーで全サムネがふわっと拡大（Heroは別レイヤなので影響なし） */
