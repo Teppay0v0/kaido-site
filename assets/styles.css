@@ -2446,3 +2446,14 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
 @media (max-width:680px){
   .access-page{ padding:120px 24px 100px !important; }
 }
+
+/* === 260520-2: Google Maps コンテナ（カスタムスタイル / SVGフォールバック対応） === */
+.access-home-map .kaido-map{
+  width:100%; aspect-ratio:4 / 3;
+  border:1px solid rgba(144,72,72,.18);
+  background:#fbf9f4;
+  position:relative; overflow:hidden;
+}
+.access-home-map .kaido-map > img{
+  display:block; width:100%; height:100%; object-fit:cover; border:0;
+}
