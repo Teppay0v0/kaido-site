@@ -2652,6 +2652,14 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   width:100%; height:100vh;
   overflow:hidden;
   z-index:50;
+  background:#1a1612;
+}
+/* halves の後ろに置く背景写真。割れた隙間から現れる */
+.room-curtain-photo{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center;
+  z-index:0;
 }
 .room-curtain-half{
   position:absolute; inset:0;
@@ -2659,6 +2667,7 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
   will-change: transform;
+  z-index:1;
 }
 .room-curtain-left{  clip-path: inset(0 50% 0 0); }
 .room-curtain-right{ clip-path: inset(0 0 0 50%); }
