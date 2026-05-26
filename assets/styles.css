@@ -2641,17 +2641,23 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   100% { text-shadow: none; }
 }
 
-/* === 260521-y: 部屋詳細ページのオープニング・カーテン演出 === */
+/* === 260521-z: 部屋詳細ページのオープニング・カーテン（スクロール駆動） === */
+.room-curtain-section{
+  position:relative;
+  height:180vh;                /* スクロール余地 80vh + sticky stage 100vh */
+  background:var(--maroon);
+}
 .room-curtain{
-  position:fixed; inset:0; z-index:9000;
-  pointer-events:none;
+  position:sticky; top:0;
+  width:100%; height:100vh;
+  overflow:hidden;
+  z-index:50;
 }
 .room-curtain-half{
   position:absolute; inset:0;
   background:var(--maroon);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
-  transition: transform 1.4s cubic-bezier(.65,0,.25,1);
   will-change: transform;
 }
 .room-curtain-left{  clip-path: inset(0 50% 0 0); }
@@ -2660,23 +2666,22 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   color:#fbf9f4;
   font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
   font-weight:700;
-  font-size:clamp(40px,7.5vw,100px);
-  letter-spacing:.34em;
   white-space:nowrap;
-  margin-left:.34em;       /* letter-spacingの末尾余白を視覚補正 */
-  animation: roomCurtainFade .8s ease-out both;
+  display:inline-flex; align-items:baseline; gap:.5em;
 }
-@keyframes roomCurtainFade {
-  0%   { opacity:0; transform:translateY(10px); }
-  100% { opacity:1; transform:translateY(0); }
+.rc-kanji{
+  font-size:clamp(56px,9vw,140px);
+  letter-spacing:.08em;
 }
-.room-curtain.is-open .room-curtain-left{  transform: translateX(-100%); }
-.room-curtain.is-open .room-curtain-right{ transform: translateX(100%); }
-.room-curtain.is-done{ display:none; }
-/* カーテン中はスクロール禁止 */
-body.has-curtain{ overflow:hidden; }
+.rc-en{
+  font-size:clamp(16px,2vw,28px);    /* 漢字より小さく */
+  letter-spacing:.38em;
+  margin-left:.38em;
+  opacity:.92;
+}
 @media (max-width:680px){
-  .room-curtain-text{ font-size:clamp(32px,11vw,64px); letter-spacing:.28em; }
+  .rc-kanji{ font-size:64px; }
+  .rc-en{ font-size:14px; letter-spacing:.32em; }
 }
 
 /* CTA「DETAILS →」: 控えめサイン。opacity/矢印 は持続的に動く */
