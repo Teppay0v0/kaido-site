@@ -2676,24 +2676,25 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
   font-weight:700;
   display:flex; flex-direction:column; align-items:center;
-  gap:.18em;
+  gap:.7em;                                /* 行間広げ */
   text-align:center;
 }
 .rc-kanji{
-  font-size:clamp(56px,9vw,140px);
+  font-size:clamp(80px,13vw,200px);        /* 漢字大きく */
   letter-spacing:.04em;
   line-height:1;
 }
 .rc-en{
-  font-size:clamp(15px,1.8vw,24px);
-  letter-spacing:.42em;
-  margin-left:.42em;    /* letter-spacing補正 */
+  font-size:clamp(20px,2.6vw,36px);        /* ENも大きく */
+  letter-spacing:.44em;
+  margin-left:.44em;
   opacity:.92;
   line-height:1;
 }
 @media (max-width:680px){
-  .rc-kanji{ font-size:64px; }
-  .rc-en{ font-size:13px; letter-spacing:.36em; }
+  .room-curtain-text{ gap:.55em; }
+  .rc-kanji{ font-size:88px; }
+  .rc-en{ font-size:16px; letter-spacing:.38em; }
 }
 
 /* === 260522-b: CONCEPT ページ — 全画面写真 ⇄ 横/縦コピーの交互構成 === */
