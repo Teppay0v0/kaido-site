@@ -2676,24 +2676,24 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
   font-weight:700;
   display:flex; flex-direction:column; align-items:center;
-  gap:.7em;                                /* 行間広げ */
+  gap:1.4em;                               /* 行間を2倍に */
   text-align:center;
 }
 .rc-kanji{
-  font-size:clamp(80px,13vw,200px);        /* 漢字大きく */
+  font-size:clamp(56px,9vw,140px);         /* 漢字は元のサイズに戻す */
   letter-spacing:.04em;
   line-height:1;
 }
 .rc-en{
-  font-size:clamp(20px,2.6vw,36px);        /* ENも大きく */
+  font-size:clamp(20px,2.6vw,36px);        /* ENは現状維持 */
   letter-spacing:.44em;
   margin-left:.44em;
   opacity:.92;
   line-height:1;
 }
 @media (max-width:680px){
-  .room-curtain-text{ gap:.55em; }
-  .rc-kanji{ font-size:88px; }
+  .room-curtain-text{ gap:1.1em; }
+  .rc-kanji{ font-size:64px; }
   .rc-en{ font-size:16px; letter-spacing:.38em; }
 }
 
