@@ -2634,24 +2634,11 @@ body{ font-size:17px; }                                  /* 全体 +約2pt */
   transform: translateX(0);
 }
 
-/* テキスト：ホバーした瞬間に一度だけ光って消える（keyframe再生） */
-@keyframes kaidoGlowBig {
-  0%   { text-shadow: none; }
-  35%  { text-shadow: 0 0 26px rgba(144,72,72,.55), 0 0 8px rgba(144,72,72,.35); }
-  100% { text-shadow: none; }
-}
+/* テキストのシャドーエフェクトは廃止（画像拡大のみに統一） */
 @keyframes kaidoGlowSoft {
   0%   { text-shadow: none; }
   35%  { text-shadow: 0 0 14px rgba(144,72,72,.42); }
   100% { text-shadow: none; }
-}
-.rooms .room-link:hover .room-kanji{
-  animation: kaidoGlowBig 1s ease-out;
-}
-.rooms .room-link:hover .room-meta,
-.rooms .room-link:hover .room-desc,
-.rooms .room-link:hover .room-cta{
-  animation: kaidoGlowSoft 1s ease-out;
 }
 
 /* CTA「DETAILS →」: 控えめサイン。opacity/矢印 は持続的に動く */
