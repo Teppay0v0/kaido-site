@@ -7,9 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/styles.css?v=20260521y" />
+<link rel="stylesheet" href="assets/styles.css?v=20260521z" />
 </head>
 <body>
+<div class="room-curtain" id="roomCurtain">
+  <div class="room-curtain-half room-curtain-left"><span class="room-curtain-text">土 TSUCHI</span></div>
+  <div class="room-curtain-half room-curtain-right"><span class="room-curtain-text">土 TSUCHI</span></div>
+</div>
 <!-- HEADER -->
 <header class="header" id="header">
   <a href="index.html" class="logo"><img src="assets/images/logo-horizontal.png" alt="KAIDO" class="logo-img" /></a>
@@ -112,6 +116,24 @@
     <span>© 2026 KAIDO. All Rights Reserved. Sapporo・Hokkaido・Japan</span>
   </div>
 </footer>
-<script src="assets/script.js?v=20260521y" defer></script>
+<script src="assets/script.js?v=20260521z" defer></script>
+<script>
+(function(){
+  const c = document.getElementById('roomCurtain');
+  if(!c) return;
+  document.body.classList.add('has-curtain');
+  function start(){
+    setTimeout(() => {
+      c.classList.add('is-open');
+      setTimeout(() => {
+        c.classList.add('is-done');
+        document.body.classList.remove('has-curtain');
+      }, 1500);
+    }, 700);
+  }
+  if(document.readyState === 'complete') start();
+  else window.addEventListener('load', start);
+})();
+</script>
 </body>
 </html>
