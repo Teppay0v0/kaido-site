@@ -188,6 +188,7 @@ body{
   background:rgba(10,12,18,.78);color:#fff;border:1px solid var(--col);
 }
 .nametag .role{display:block;font-size:8px;font-weight:500;color:var(--ink-mute);letter-spacing:.08em;text-align:center}
+.nametag .model{color:var(--accent);font-family:var(--mono);font-weight:600}
 
 /* progress bar over head while working */
 .workbar{
@@ -351,7 +352,7 @@ body{
 <div class="app">
   <!-- ===== TOP BAR ===== -->
   <header class="topbar">
-    <div class="brand"><span class="dot"></span>KAIDO&nbsp;STUDIO <small>AGENT OFFICE</small></div>
+    <div class="brand"><span class="dot"></span>KAIDO&nbsp;STUDIO <small>AGENT OFFICE · POWERED BY CLAUDE OPUS</small></div>
     <div class="spacer"></div>
     <div class="status-pill" id="statusPill"><span class="beat"></span><span id="statusText">待機中 — 指示をどうぞ</span></div>
   </header>
@@ -474,7 +475,7 @@ class Agent{
         <div class="emote"></div>
         <div class="bubble"></div>
         <div class="avatar"><span class="ring"></span>${this.emoji}</div>
-        <div class="nametag">${this.name}<span class="role">${this.role}</span></div>
+        <div class="nametag">${this.name}<span class="role">${this.role} · <span class="model">opus</span></span></div>
       </div>`;
     world.appendChild(el);
     this.el=el;
@@ -557,7 +558,7 @@ function buildRoster(){
     const c=document.createElement('div');
     c.className='rcard'; c.style.setProperty('--col',a.color); c.dataset.busy='0';
     c.innerHTML=`<div class="chip">${a.emoji}</div>
-      <div class="meta"><b>${a.name}</b><span>${a.role}</span></div>
+      <div class="meta"><b>${a.name}</b><span>${a.role} · claude-opus</span></div>
       <div class="st">待機</div>`;
     rosterEl.appendChild(c);
     byId[a.id] && (byId[a.id].card=c);
@@ -878,7 +879,7 @@ buildFurniture();
 TEAM.forEach(def=>new Agent(def));
 buildRoster();
 requestAnimationFrame(loop);
-addSys('KAIDO STUDIO 起動。エージェント6名が待機中。');
+addSys('KAIDO STUDIO 起動。エージェント6名（claude-opus）が待機中。');
 setTimeout(()=>{ byId.pm.say('準備OK！なにを作りましょう？',{dur:2600}); }, 900);
 </script>
 </body>
