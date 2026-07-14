@@ -155,6 +155,23 @@ body{
 .taskboard li.in_progress .ic{animation:beat 1.2s infinite}
 .taskboard li.completed{opacity:.5;text-decoration:line-through}
 
+/* files section inside taskboard */
+.taskboard .fhead{border-top:1px solid #e5e2d5;border-bottom:2px solid #5ec8c0}
+.taskboard #fileList li{font-family:var(--mono);font-size:10.5px;padding:4px 8px}
+
+/* session stats HUD */
+.statshud{
+  position:absolute;right:14px;bottom:96px;z-index:16;
+  display:flex;gap:10px;align-items:center;
+  padding:7px 14px;border-radius:999px;
+  background:rgba(14,17,25,.85);border:1px solid var(--line);
+  font-size:12px;color:var(--ink-soft);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+.statshud b{font-family:var(--mono);color:var(--ink);font-weight:600}
+.statshud .errst b{color:#ff9b9b}
+.statshud span{display:flex;gap:4px;align-items:center}
+
 /* error log entry */
 .msg.err .txt{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.45);color:#ffb3b3;font-family:var(--mono);font-size:11px}
 .msg.err .who{display:none}
@@ -187,30 +204,21 @@ body{
 .stage-wrap{grid-area:stage;position:relative;overflow:hidden}
 .stage{
   position:absolute;inset:0;
-  perspective:1400px;
+  display:flex;align-items:center;justify-content:center;
+  container-type:size;
+  padding:10px;
 }
-.floor{
-  position:absolute;
-  left:6%;right:6%;top:8%;bottom:9%;
-  transform:rotateX(34deg);
-  transform-style:preserve-3d;
-  border-radius:18px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 79px, rgba(255,255,255,.025) 79px 80px),
-    repeating-linear-gradient(0deg,  transparent 0 79px, rgba(255,255,255,.025) 79px 80px),
-    linear-gradient(160deg,var(--floor) 0%,var(--floor-2) 100%);
-  box-shadow:
-    0 60px 120px rgba(0,0,0,.55),
-    inset 0 0 0 1px rgba(255,255,255,.04),
-    inset 0 40px 80px rgba(0,0,0,.25);
+/* オフィスのイラスト背景(1375x1144)をアスペクト維持でフィットさせる部屋 */
+.room{
+  position:relative;
+  aspect-ratio:1375/1144;
+  width:min(96cqw, calc(96cqh * 1.2019));
+  height:min(96cqh, calc(96cqw / 1.2019));
+  border-radius:16px;
+  background:url('assets/images/agents/office-bg.jpg') center/cover no-repeat;
+  box-shadow:0 30px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
 }
-.floor::after{
-  /* soft rug in the meeting zone */
-  content:"";position:absolute;left:33%;top:30%;width:34%;height:40%;
-  border-radius:50%;
-  background:radial-gradient(ellipse at center, rgba(224,177,92,.10), transparent 70%);
-}
-/* layer that holds all placed objects & agents, sharing the floor tilt */
+/* layer that holds all agents (座標は部屋画像に対する%で指定) */
 .world{position:absolute;inset:0;transform-style:preserve-3d}
 
 /* furniture */
@@ -325,7 +333,7 @@ body{
 /* speech bubble */
 .bubble{
   position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%) translateY(6px) scale(.9);
-  max-width:190px;min-width:40px;
+  width:max-content;max-width:190px;min-width:40px;
   padding:7px 11px;border-radius:12px;
   background:#fff;color:#1a1d26;font-size:12px;line-height:1.45;font-weight:500;
   box-shadow:0 10px 24px rgba(0,0,0,.4);
@@ -558,8 +566,9 @@ body{
     <div class="hint" id="hint">下の入力欄に「LP作って」と打ってみてください ↓</div>
     <div class="ticker" id="ticker" hidden><span class="ticker-line" id="tickerLine"></span></div>
     <div class="stage">
-      <div class="floor"></div>
-      <div class="world" id="world"><!-- furniture & agents injected here --></div>
+      <div class="room">
+        <div class="world" id="world"><!-- agents injected here --></div>
+      </div>
     </div>
     <div class="daynight" id="daynight"></div>
     <canvas id="confetti"></canvas>
@@ -568,6 +577,17 @@ body{
     <div class="taskboard" id="taskboard">
       <div class="thead">📋 SPRINT BOARD <span class="cnt" id="taskCount"></span></div>
       <ul id="taskList"></ul>
+      <div class="thead fhead" id="filesHead" hidden>📝 変更ファイル</div>
+      <ul id="fileList" hidden></ul>
+    </div>
+
+    <!-- session stats HUD (LIVE mode) -->
+    <div class="statshud" id="statshud" hidden>
+      <span title="ツール実行">🔧 <b id="stTools">0</b></span>
+      <span title="ファイル編集">✏️ <b id="stEdits">0</b></span>
+      <span title="サブエージェント">🤖 <b id="stAgents">0</b></span>
+      <span title="フック">🪝 <b id="stHooks">0</b></span>
+      <span title="エラー" class="errst">⚠ <b id="stErrors">0</b></span>
     </div>
 
     <!-- big office code monitor (Opus streaming output) -->
@@ -634,59 +654,24 @@ const statusPill = document.getElementById('statusPill');
 const hintEl = document.getElementById('hint');
 
 /* ---- team definition ---- */
+/* デスク座標はオフィス背景画像(office-bg.jpg)の各椅子の位置に対応 */
 const TEAM = [
-  {id:'pm',    name:'マネジャー', role:'PM',        emoji:'🧑‍💼', color:'var(--c-pm)',     desk:{x:50,y:16},
+  {id:'pm',    name:'マネジャー', role:'PM',        emoji:'🧑‍💼', color:'var(--c-pm)',     desk:{x:49,y:42},
    sprite:'assets/images/agents/manager'},
-  {id:'design',name:'アオイ',     role:'Designer',  emoji:'🎨', color:'var(--c-design)', desk:{x:20,y:32},
+  {id:'design',name:'アオイ',     role:'Designer',  emoji:'🎨', color:'var(--c-design)', desk:{x:23,y:43},
    sprite:'assets/images/agents/aoi'},
-  {id:'front', name:'リク',       role:'Frontend',  emoji:'💻', color:'var(--c-front)',  desk:{x:20,y:66},
+  {id:'front', name:'リク',       role:'Frontend',  emoji:'💻', color:'var(--c-front)',  desk:{x:16,y:68},
    sprite:'assets/images/agents/riku'},
-  {id:'back',  name:'ハル',       role:'Backend',   emoji:'⚙️', color:'var(--c-back)',   desk:{x:80,y:32},
+  {id:'back',  name:'ハル',       role:'Backend',   emoji:'⚙️', color:'var(--c-back)',   desk:{x:76,y:43},
    sprite:'assets/images/agents/haru'},
-  {id:'write', name:'ナギ',       role:'Writer',    emoji:'✍️', color:'var(--c-write)',  desk:{x:80,y:66},
+  {id:'write', name:'ナギ',       role:'Writer',    emoji:'✍️', color:'var(--c-write)',  desk:{x:78,y:67},
    sprite:'assets/images/agents/nagi'},
-  {id:'qa',    name:'ソウ',       role:'QA',        emoji:'🔍', color:'var(--c-qa)',     desk:{x:50,y:80},
+  {id:'qa',    name:'ソウ',       role:'QA',        emoji:'🔍', color:'var(--c-qa)',     desk:{x:48,y:90},
    sprite:'assets/images/agents/sou'},
 ];
-const MEETING = {x:50, y:46};      // table center
+const MEETING = {x:49, y:57};      // 画像の会議テーブル中心
 const byId = {};
-
-/* ---- furniture layout ---- */
-const FURNITURE = [
-  {type:'table', x:50, y:46, label:'MEETING'},
-  {type:'board', x:50, y:30, text:'📋 SPRINT BOARD'},
-  {type:'plant', x:9,  y:14},
-  {type:'plant', x:91, y:14},
-  {type:'plant', x:9,  y:86},
-  {type:'plant', x:91, y:86},
-];
-
-/* ============ build world ============ */
-function buildFurniture(){
-  FURNITURE.forEach(f=>{
-    const el = document.createElement('div');
-    el.className = 'obj';
-    el.style.left = f.x+'%'; el.style.top = f.y+'%';
-    if(f.type==='table'){
-      const t=document.createElement('div'); t.className='table';
-      t.innerHTML='<div class="tlabel">'+(f.label||'')+'</div>'; el.appendChild(t);
-    }else if(f.type==='board'){
-      const b=document.createElement('div'); b.className='board';
-      b.innerHTML='<div class="btext">'+(f.text||'')+'</div>'; el.appendChild(b);
-    }else if(f.type==='plant'){
-      const p=document.createElement('div'); p.className='plant'; el.appendChild(p);
-    }
-    world.appendChild(el);
-  });
-  // desks
-  TEAM.forEach(a=>{
-    const el=document.createElement('div'); el.className='obj';
-    el.style.left=a.desk.x+'%'; el.style.top=(a.desk.y+8)+'%';
-    const d=document.createElement('div'); d.className='desk';
-    d.innerHTML='<div class="screen" id="screen-'+a.id+'"></div><div class="label">'+a.role+'</div>';
-    el.appendChild(d); world.appendChild(el);
-  });
-}
+/* 家具は背景画像(office-bg.jpg)に描かれているためDOM生成しない */
 
 /* ============ Agent class ============ */
 class Agent{
@@ -911,7 +896,7 @@ async function ambientStep(){
   if(roll<0.45){
     // wander near own desk
     const nx=clamp(a.desk.x+(Math.random()*20-10), 10, 90);
-    const ny=clamp(a.desk.y+(Math.random()*14-7), 12, 84);
+    const ny=clamp(a.desk.y+(Math.random()*14-7), 34, 90);
     await a.moveTo(nx,ny); await sleep(600+Math.random()*800);
     if(!jobRunning && a.state==='idle') a.toDesk();
   }else if(roll<0.7){
@@ -925,10 +910,11 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 setInterval(ambientStep, 2200);
 
 /* offset so multiple agents around the table don't overlap */
-function seatAround(center, i, n, r=18){
-  const ang = (-90 + i*(360/n)) * Math.PI/180;
+function seatAround(center, i, n, r=19){
+  // -45度始まりで席を斜めに配置(真上はPMの定位置なので避ける)
+  const ang = (-45 + i*(360/n)) * Math.PI/180;
   return { x: clamp(center.x + Math.cos(ang)*r, 8,92),
-           y: clamp(center.y + Math.sin(ang)*r*0.62, 12,84) };
+           y: clamp(center.y + Math.sin(ang)*r*0.85, 36,88) };
 }
 
 /* ============================================================
@@ -943,7 +929,7 @@ const WORKFLOWS = {
 
 async function gatherTeam(members){
   const pm=byId.pm;
-  await pm.moveTo(MEETING.x, MEETING.y-14);
+  await pm.moveTo(MEETING.x, MEETING.y-17);
   pm.emote('📣');
   pm.say('みんな、ちょっと集まって！',{dur:2000});
   await sleep(700);
@@ -1008,7 +994,7 @@ async function runLP(userText){
   await sleep(700);
 
   // 4) PM wrap-up
-  await pm.moveTo(MEETING.x, MEETING.y-8);
+  await pm.moveTo(MEETING.x, MEETING.y-17);
   pm.emote('🎉');
   pm.say('完成！LP納品できます🎉',{dur:2600});
   addSys('✔ 納品完了: landing-page.html');
@@ -1041,7 +1027,7 @@ async function runBug(userText){
   setStatus('再テスト…', true);
   await qa.work(2200); qa.say('直ってます！',{dur:1800}); addDone('qa','再テスト通過 ✅');
   qa.emote('✅');
-  await pm.moveTo(MEETING.x,MEETING.y-8);
+  await pm.moveTo(MEETING.x,MEETING.y-17);
   pm.emote('🎉'); pm.say('修正完了！デプロイします',{dur:2200});
   addSys('✔ 完了: hotfix をマージしました');
   celebrate(); pm.toDesk();
@@ -1063,7 +1049,7 @@ async function runArticle(userText){
   design.say('アイキャッチ作るね',{dur:1800});
   await design.work(2600); addDone('design','アイキャッチ画像 完成'); design.toDesk();
   await qa.work(2000); addDone('qa','誤字脱字チェック済み ✅');
-  await pm.moveTo(MEETING.x,MEETING.y-8);
+  await pm.moveTo(MEETING.x,MEETING.y-17);
   pm.emote('🎉'); pm.say('記事、公開準備OK！',{dur:2200});
   addSys('✔ 完了: article.md を公開キューへ');
   celebrate(); pm.toDesk();
@@ -1088,7 +1074,7 @@ async function runFeature(userText){
   ]);
   setStatus('結合テスト…', true);
   await qa.work(2800); qa.say('結合テスト通過！',{dur:1800}); addDone('qa','QA通過 ✅');
-  await pm.moveTo(MEETING.x,MEETING.y-8);
+  await pm.moveTo(MEETING.x,MEETING.y-17);
   pm.emote('🎉'); pm.say('新機能リリース完了🎉',{dur:2400});
   addSys('✔ 完了: feature をリリースしました');
   celebrate(); pm.toDesk();
@@ -1402,7 +1388,7 @@ async function runAIJob(userText){
   const pm=byId.pm;
   setStatus('Opusが計画中…', true);
   addSys('AIモード: claude-opus-4-8 に台本を依頼');
-  await pm.moveTo(MEETING.x, MEETING.y-14);
+  await pm.moveTo(MEETING.x, MEETING.y-17);
   pm.say('Opusと相談して段取り組むね…',{dur:2600,think:true});
 
   let play;
@@ -1453,7 +1439,7 @@ async function runAIJob(userText){
     monitorClose();
     if(result){
       aiLast={deliverable:play.deliverable, userText, title, content:result};
-      await pm.moveTo(MEETING.x,MEETING.y-8);
+      await pm.moveTo(MEETING.x,MEETING.y-17);
       pm.emote('🎉'); pm.say('完成！納品します🎉',{dur:2600});
       addSys('✔ 納品完了: '+(play.deliverable==='lp'?'landing-page.html':'article.md'));
       celebrate();
@@ -1462,7 +1448,7 @@ async function runAIJob(userText){
       return;
     }
   }
-  await pm.moveTo(MEETING.x,MEETING.y-8);
+  await pm.moveTo(MEETING.x,MEETING.y-17);
   pm.emote('🎉'); pm.say('タスク完了！',{dur:2200});
   celebrate(); pm.toDesk();
 }
@@ -1499,14 +1485,14 @@ async function runAIRevision(instruction){
 
   if(result){
     aiLast.content=result;
-    await pm.moveTo(MEETING.x,MEETING.y-8);
+    await pm.moveTo(MEETING.x,MEETING.y-17);
     pm.emote('🎉'); pm.say('修正版できました！',{dur:2400});
     addSys('✔ 修正版を納品: '+fname);
     celebrate();
     showGeneratedDeliverable(kind, result, aiLast.title);
     pm.toDesk();
   }else{
-    await pm.moveTo(MEETING.x,MEETING.y-8);
+    await pm.moveTo(MEETING.x,MEETING.y-17);
     pm.say('修正に失敗しました…',{dur:2200}); pm.toDesk();
   }
 }
@@ -1563,14 +1549,17 @@ const pendingTools=new Map();        // tool_use id -> {who, name, detail}
 
 /* --- タスクボード (実セッションのTODO) --- */
 const taskBoard=new Map();           // id -> {subject, status}
+const liveFiles=[];                  // 変更されたファイル(basename, 新しい順)
 const taskboardEl=document.getElementById('taskboard');
 const taskListEl=document.getElementById('taskList');
+const fileListEl=document.getElementById('fileList');
+const filesHeadEl=document.getElementById('filesHead');
 const TASK_ICON={pending:'☐', in_progress:'🔨', completed:'✅'};
 function renderTaskBoard(){
   const items=[...taskBoard.values()];
-  taskboardEl.classList.toggle('show', MODE==='live' && items.length>0);
+  taskboardEl.classList.toggle('show', MODE==='live' && (items.length>0 || liveFiles.length>0));
   const done=items.filter(t=>t.status==='completed').length;
-  document.getElementById('taskCount').textContent=done+'/'+items.length;
+  document.getElementById('taskCount').textContent=items.length?done+'/'+items.length:'';
   taskListEl.innerHTML='';
   for(const t of items){
     const li=document.createElement('li');
@@ -1579,8 +1568,44 @@ function renderTaskBoard(){
     li.querySelector('span:last-child').textContent=t.subject;
     taskListEl.appendChild(li);
   }
+  // 変更ファイルセクション
+  const showFiles=liveFiles.length>0;
+  filesHeadEl.hidden=!showFiles; fileListEl.hidden=!showFiles;
+  fileListEl.innerHTML='';
+  for(const f of liveFiles.slice(0,8)){
+    const li=document.createElement('li');
+    li.innerHTML='<span class="ic">📄</span><span></span>';
+    li.querySelector('span:last-child').textContent=f;
+    fileListEl.appendChild(li);
+  }
 }
-function clearTaskBoard(){ taskBoard.clear(); renderTaskBoard(); }
+function recordFile(path){
+  const base=String(path||'').split('/').pop();
+  if(!base) return;
+  const i=liveFiles.indexOf(base);
+  if(i>=0) liveFiles.splice(i,1);
+  liveFiles.unshift(base);
+  if(liveFiles.length>20) liveFiles.pop();
+  renderTaskBoard();
+}
+function clearTaskBoard(){ taskBoard.clear(); liveFiles.length=0; renderTaskBoard(); }
+
+/* --- セッション統計HUD --- */
+const liveStats={tools:0,edits:0,agents:0,hooks:0,errors:0};
+const statshudEl=document.getElementById('statshud');
+function bumpStat(key){
+  liveStats[key]++;
+  const el=document.getElementById('st'+key[0].toUpperCase()+key.slice(1));
+  if(el) el.textContent=liveStats[key];
+  statshudEl.hidden = MODE!=='live';
+}
+function resetStats(){
+  for(const k of Object.keys(liveStats)){ liveStats[k]=0;
+    const el=document.getElementById('st'+k[0].toUpperCase()+k.slice(1));
+    if(el) el.textContent='0';
+  }
+  statshudEl.hidden=true;
+}
 
 /* --- エラーログ --- */
 function addErr(text){
@@ -1608,6 +1633,12 @@ let tickerFadeTimer=null;  // 最後の表示から6秒でフェードアウト
 
 /* イベント種別ごとの実況文プール ({name}=キャラ名 {detail}=対象 {n}=回数) */
 const TICKER_LINES={
+  hook:[
+    '🪝 フック発動！{detail}が仕事をチェック！',
+    '🪝 自動チェック係「{detail}」が走った！',
+    '🪝 {detail}、静かに見守っている…',
+    '🪝 フック「{detail}」、異常なしを確認！',
+  ],
   bash:[
     '{name}、コマンドを豪快に実行！','{name}のターミナルが火を噴く！',
     '{name}、シェルに指令を叩き込む！','{name}、コマンド一発、勝負に出た！',
@@ -1719,7 +1750,7 @@ async function maybeRally(){
   rallyCooldownUntil=now+20000;
   const pm=byId.pm;
   if(pm.state!=='idle') return;
-  await pm.moveTo(MEETING.x, MEETING.y-14);
+  await pm.moveTo(MEETING.x, MEETING.y-17);
   pm.emote('📣');
   pm.say('並列でいくよ、手分けして！',{dur:2600,log:false});
   addMsg('pm','並列でいくよ、手分けして！');
@@ -1739,7 +1770,7 @@ function connectLive(){
 function disconnectLive(){
   if(es){ es.close(); es=null; }
   liveAssign.clear(); liveActive.clear(); livePoolIdx=0;
-  pendingTools.clear(); clearTaskBoard();
+  pendingTools.clear(); clearTaskBoard(); resetStats();
   TEAM.forEach(a=>{ const ag=byId[a.id]; ag.el.classList.remove('indet');
     clearTimeout(ag._tiredT); ag.setMood('normal'); ag.setState('idle'); ag.toDesk(); });
   // 実況ティッカー & カウンタをリセット
@@ -1778,7 +1809,7 @@ async function handleLiveEvent(ev){
       break;
     case 'session':
       addSys('セッション切替: '+ev.file);
-      clearTaskBoard(); pendingTools.clear();
+      clearTaskBoard(); pendingTools.clear(); resetStats();
       break;
     case 'user':
       addMsg(null,'👤 '+ev.text);
@@ -1796,6 +1827,8 @@ async function handleLiveEvent(ev){
       break;
     case 'tool_use': {
       const who = ev.sidechain ? liveCharFor(ev.chain) : byId[TOOL_CHAR[ev.name]||'back'];
+      bumpStat('tools');
+      if(ev.name==='Write'||ev.name==='Edit'||ev.name==='NotebookEdit'){ bumpStat('edits'); recordFile(ev.detail); }
       pendingTools.set(ev.id,{who,name:ev.name,detail:ev.detail||''});
       if(pendingTools.size>200) pendingTools.delete(pendingTools.keys().next().value);
       who.emote(TOOL_ICON[ev.name]||'🔧');
@@ -1825,6 +1858,7 @@ async function handleLiveEvent(ev){
       const p=pendingTools.get(ev.id);
       if(p) pendingTools.delete(ev.id);
       if(ev.isError){
+        bumpStat('errors');
         const who=p?p.who:byId.pm;
         oops(who);
         addErr((p?who.name+'の'+p.name:'ツール')+'が失敗: '+(ev.excerpt||'').slice(0,120));
@@ -1838,6 +1872,15 @@ async function handleLiveEvent(ev){
           }
         }
       }
+      break;
+    }
+    case 'hook': {
+      bumpStat('hooks');
+      const cmds=(ev.commands||[]).join(', ');
+      byId.pm.emote('🪝');
+      tickerSay('hook',{detail:cmds||'hook'});
+      addSys('🪝 フック発動: '+cmds+(ev.totalMs?' ('+ev.totalMs+'ms)':''));
+      if(ev.errors) addErr('フックが失敗しました: '+cmds);
       break;
     }
     case 'todos':
@@ -1871,13 +1914,14 @@ async function handleLiveEvent(ev){
       break;
     case 'agent_spawn': {
       const c=liveCharFor(ev.chain);
+      bumpStat('agents');
       addSys('▶ '+c.name+' がタスク受領: '+ev.task.slice(0,80));
       tickerSay('spawn',{name:c.name});
       liveActive.add(ev.chain);
       maybeRally(); // 短時間に複数起動ならPMが号令
       // 演出は非同期で流し、完了イベントとのレースを liveActive で防ぐ
       (async()=>{
-        await c.moveTo(MEETING.x+(Math.random()*10-5), MEETING.y-6);
+        await c.moveTo(MEETING.x+(Math.random()*10-5), MEETING.y-17);
         c.say('担当します！',{dur:1600,log:false});
         await sleep(600);
         await c.toDesk();
@@ -1945,7 +1989,6 @@ const quick=document.getElementById('quick');
 });
 
 /* ============ boot ============ */
-buildFurniture();
 TEAM.forEach(def=>new Agent(def));
 buildRoster();
 requestAnimationFrame(loop);

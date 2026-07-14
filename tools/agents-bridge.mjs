@@ -66,6 +66,17 @@ function handleLine(line, chainFromFile, replay) {
   let d;
   try { d = JSON.parse(line); } catch { return; }
   const type = d.type;
+  // フック実行のサマリ (Stopフック等) → 可視化イベント
+  if (type === 'system' && d.subtype && d.subtype.includes('hook')) {
+    const infos = Array.isArray(d.hookInfos) ? d.hookInfos : [];
+    broadcast({
+      t: 'hook', replay,
+      commands: infos.map(h => String(h.command || '').split('/').pop().slice(0, 60)),
+      totalMs: infos.reduce((s, h) => s + (h.durationMs || 0), 0),
+      errors: Array.isArray(d.hookErrors) ? d.hookErrors.length : 0,
+    });
+    return;
+  }
   if (type !== 'assistant' && type !== 'user') return;
 
   const sidechain = !!d.isSidechain || !!chainFromFile;
