@@ -73,6 +73,75 @@ body{
 .status-pill.busy .beat{background:var(--accent);box-shadow:0 0 8px var(--accent)}
 @keyframes beat{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 
+/* ---- mode tabs ---- */
+.modes{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.modes button{
+  font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink-mute);
+  padding:5px 14px;border:none;border-radius:8px;background:transparent;cursor:pointer;transition:.15s;
+}
+.modes button:hover{color:var(--ink)}
+.modes button.active{background:var(--accent);color:#1a1d26}
+.modes button.active[data-mode="live"]{background:var(--c-back)}
+.iconbtn{
+  width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  color:var(--ink-soft);font-size:16px;cursor:pointer;transition:.15s;
+}
+.iconbtn:hover{border-color:var(--accent);color:#fff}
+
+/* ---- settings modal ---- */
+.settings{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:rgba(6,8,12,.72);backdrop-filter:blur(3px)}
+.settings.show{display:flex;animation:slidein .25s}
+.settings .card{width:min(480px,90%);border-radius:16px;background:var(--panel);border:1px solid var(--line);
+  padding:22px 24px;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.settings h3{font-size:15px;margin-bottom:4px}
+.settings p{font-size:12px;color:var(--ink-mute);line-height:1.6;margin-bottom:14px}
+.settings label{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);margin:12px 0 5px;letter-spacing:.06em}
+.settings input{width:100%;font-family:var(--mono);font-size:13px;color:var(--ink);
+  padding:10px 12px;border-radius:10px;background:#0f1119;border:1px solid var(--line);outline:none}
+.settings input:focus{border-color:var(--accent)}
+.settings .row{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.settings .row button{font-family:var(--sans);font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--ink-soft)}
+.settings .row button.primary{background:var(--accent);border-color:var(--accent);color:#1a1d26}
+.settings .warn{font-size:11px;color:#e0a15c;background:rgba(224,161,92,.08);border:1px solid rgba(224,161,92,.25);
+  border-radius:8px;padding:8px 10px;margin-top:12px;line-height:1.55}
+
+/* ---- big office code monitor ---- */
+.monitor{
+  position:absolute;right:14px;top:14px;z-index:18;
+  width:min(380px,42%);height:46%;display:none;flex-direction:column;
+  border-radius:12px;overflow:hidden;border:1px solid #2c3a52;
+  background:rgba(10,14,22,.94);box-shadow:0 24px 60px rgba(0,0,0,.6), 0 0 30px rgba(90,150,255,.08);
+}
+.monitor.show{display:flex;animation:slidein .3s}
+.monitor .mhead{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:#141a28;border-bottom:1px solid #223;font-family:var(--mono);font-size:11px;color:#8fb8ff}
+.monitor .mhead .dots{display:flex;gap:5px}
+.monitor .mhead .dots i{width:9px;height:9px;border-radius:50%;background:#39415a}
+.monitor .mhead .dots i:nth-child(1){background:#ff6b6b}.monitor .mhead .dots i:nth-child(2){background:#f7c948}.monitor .mhead .dots i:nth-child(3){background:#51cf88}
+.monitor pre{
+  flex:1;margin:0;padding:10px 12px;overflow-y:auto;
+  font-family:var(--mono);font-size:10.5px;line-height:1.55;color:#a8d0a2;white-space:pre-wrap;word-break:break-all;
+  scrollbar-width:thin;scrollbar-color:#2c3a52 transparent;
+}
+.monitor pre::after{content:"▌";color:#7ad19a;animation:beat 1s infinite}
+
+/* live indeterminate progress */
+.agent.working.indet .workbar > i{width:40% !important;animation:indet 1s linear infinite}
+@keyframes indet{0%{margin-left:-40%}100%{margin-left:100%}}
+
+/* confetti canvas */
+#confetti{position:absolute;inset:0;z-index:35;pointer-events:none}
+
+/* deliverable iframe variant */
+.deliver .card.wide{width:min(720px,94%)}
+.lp-frame{width:100%;height:min(62vh,540px);border:none;background:#fff;display:block}
+.deliver .actions{display:flex;gap:8px;padding:10px 14px;background:#f6f6f8;justify-content:flex-end}
+.deliver .actions a,.deliver .actions button{
+  font-family:var(--sans);font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer;
+  border:1px solid #d5d7de;background:#fff;color:#1a1d26;text-decoration:none}
+.deliver .actions .primary{background:#e0b15c;border-color:#e0b15c}
+
 /* ============ STAGE (office floor) ============ */
 .stage-wrap{grid-area:stage;position:relative;overflow:hidden}
 .stage{
@@ -361,8 +430,14 @@ body{
   <!-- ===== TOP BAR ===== -->
   <header class="topbar">
     <div class="brand"><span class="dot"></span>KAIDO&nbsp;STUDIO <small>AGENT OFFICE · POWERED BY CLAUDE OPUS</small></div>
+    <nav class="modes" id="modes">
+      <button data-mode="demo" class="active" title="台本による演出モード">🎬 デモ</button>
+      <button data-mode="ai" title="会話と成果物を本物のOpusが生成">🤖 AI</button>
+      <button data-mode="live" title="実際のClaude Codeセッションを中継">📡 LIVE</button>
+    </nav>
     <div class="spacer"></div>
     <div class="status-pill" id="statusPill"><span class="beat"></span><span id="statusText">待機中 — 指示をどうぞ</span></div>
+    <button class="iconbtn" id="settingsBtn" title="設定">⚙️</button>
   </header>
 
   <!-- ===== STAGE ===== -->
@@ -372,11 +447,36 @@ body{
       <div class="floor"></div>
       <div class="world" id="world"><!-- furniture & agents injected here --></div>
     </div>
+    <canvas id="confetti"></canvas>
+
+    <!-- big office code monitor (Opus streaming output) -->
+    <div class="monitor" id="monitor">
+      <div class="mhead"><span class="dots"><i></i><i></i><i></i></span><span id="monitorTitle">opus — generating…</span></div>
+      <pre id="monitorBody"></pre>
+    </div>
+
+    <!-- settings -->
+    <div class="settings" id="settings">
+      <div class="card">
+        <h3>⚙️ 設定</h3>
+        <p>AIモードはブラウザから直接 Anthropic API (claude-opus-4-8) を呼びます。LIVEモードはローカルのブリッジサーバー経由で実際のClaude Codeセッションを中継します。</p>
+        <label>Anthropic API キー（AIモード用）</label>
+        <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off" />
+        <label>ブリッジURL（LIVEモード用）</label>
+        <input id="bridgeInput" type="text" placeholder="http://localhost:8787/events" />
+        <div class="warn">⚠️ APIキーはこの端末の localStorage にのみ保存されます。共有PCでは使用後に消してください。LIVEモードは <code>node tools/agents-bridge.mjs</code> を起動してから接続します。</div>
+        <div class="row">
+          <button id="settingsClear">キーを消去</button>
+          <button id="settingsCancel">閉じる</button>
+          <button class="primary" id="settingsSave">保存</button>
+        </div>
+      </div>
+    </div>
 
     <!-- deliverable modal -->
     <div class="deliver" id="deliver">
-      <div class="card">
-        <div class="cap">📦 <span class="g">deliverable</span> — landing-page.html <button id="closeDeliver">×</button></div>
+      <div class="card" id="deliverCard">
+        <div class="cap">📦 <span class="g">deliverable</span> — <span id="deliverName">landing-page.html</span> <button id="closeDeliver">×</button></div>
         <div class="lp-preview" id="lpPreview"></div>
       </div>
     </div>
@@ -414,13 +514,18 @@ const hintEl = document.getElementById('hint');
 
 /* ---- team definition ---- */
 const TEAM = [
-  {id:'pm',    name:'マネジャー', role:'PM',        emoji:'🧑‍💼', color:'var(--c-pm)',     desk:{x:50,y:16}},
-  {id:'design',name:'アオイ',     role:'Designer',  emoji:'🎨', color:'var(--c-design)', desk:{x:20,y:32}},
+  {id:'pm',    name:'マネジャー', role:'PM',        emoji:'🧑‍💼', color:'var(--c-pm)',     desk:{x:50,y:16},
+   sprite:'assets/images/agents/manager'},
+  {id:'design',name:'アオイ',     role:'Designer',  emoji:'🎨', color:'var(--c-design)', desk:{x:20,y:32},
+   sprite:'assets/images/agents/aoi'},
   {id:'front', name:'リク',       role:'Frontend',  emoji:'💻', color:'var(--c-front)',  desk:{x:20,y:66},
    sprite:'assets/images/agents/riku'},
-  {id:'back',  name:'ハル',       role:'Backend',   emoji:'⚙️', color:'var(--c-back)',   desk:{x:80,y:32}},
-  {id:'write', name:'ナギ',       role:'Writer',    emoji:'✍️', color:'var(--c-write)',  desk:{x:80,y:66}},
-  {id:'qa',    name:'ソウ',       role:'QA',        emoji:'🔍', color:'var(--c-qa)',     desk:{x:50,y:80}},
+  {id:'back',  name:'ハル',       role:'Backend',   emoji:'⚙️', color:'var(--c-back)',   desk:{x:80,y:32},
+   sprite:'assets/images/agents/haru'},
+  {id:'write', name:'ナギ',       role:'Writer',    emoji:'✍️', color:'var(--c-write)',  desk:{x:80,y:66},
+   sprite:'assets/images/agents/nagi'},
+  {id:'qa',    name:'ソウ',       role:'QA',        emoji:'🔍', color:'var(--c-qa)',     desk:{x:50,y:80},
+   sprite:'assets/images/agents/sou'},
 ];
 const MEETING = {x:50, y:46};      // table center
 const byId = {};
@@ -847,13 +952,18 @@ async function runFeature(userText){
 /* ---------- confetti-ish celebrate ---------- */
 function celebrate(){
   TEAM.forEach((a,i)=>setTimeout(()=>byId[a.id].emote(['🎉','✨','🎊','👏','🥳'][i%5]), i*120));
+  if(typeof fireConfetti==='function') fireConfetti();
 }
 
 /* ============ deliverable modal (LP preview) ============ */
 const deliver=document.getElementById('deliver');
 const lpPreview=document.getElementById('lpPreview');
-document.getElementById('closeDeliver').onclick=()=>deliver.classList.remove('show');
-deliver.onclick=e=>{ if(e.target===deliver) deliver.classList.remove('show'); };
+function closeDeliverModal(){
+  deliver.classList.remove('show');
+  document.getElementById('deliverCard').classList.remove('wide');
+}
+document.getElementById('closeDeliver').onclick=closeDeliverModal;
+deliver.onclick=e=>{ if(e.target===deliver) closeDeliverModal(); };
 function showDeliverable(userText){
   const title = extractTitle(userText);
   lpPreview.innerHTML=`
@@ -880,6 +990,410 @@ function extractTitle(t){
   return cleaned.length>1 && cleaned.length<24 ? cleaned : DEFAULT;
 }
 
+/* ============================================================
+   SETTINGS & MODES
+   ============================================================ */
+const SETTINGS = {
+  get apiKey(){ return localStorage.getItem('kaido_agents_apikey') || ''; },
+  set apiKey(v){ v ? localStorage.setItem('kaido_agents_apikey', v) : localStorage.removeItem('kaido_agents_apikey'); },
+  get bridge(){ return localStorage.getItem('kaido_agents_bridge') || 'http://localhost:8787/events'; },
+  set bridge(v){ localStorage.setItem('kaido_agents_bridge', v); },
+};
+const settingsEl=document.getElementById('settings');
+const apiKeyInput=document.getElementById('apiKeyInput');
+const bridgeInput=document.getElementById('bridgeInput');
+function openSettings(){ apiKeyInput.value=SETTINGS.apiKey; bridgeInput.value=SETTINGS.bridge; settingsEl.classList.add('show'); }
+document.getElementById('settingsBtn').onclick=openSettings;
+document.getElementById('settingsCancel').onclick=()=>settingsEl.classList.remove('show');
+document.getElementById('settingsClear').onclick=()=>{ SETTINGS.apiKey=''; apiKeyInput.value=''; addSys('APIキーを消去しました'); };
+document.getElementById('settingsSave').onclick=()=>{
+  SETTINGS.apiKey=apiKeyInput.value.trim();
+  if(bridgeInput.value.trim()) SETTINGS.bridge=bridgeInput.value.trim();
+  settingsEl.classList.remove('show'); addSys('設定を保存しました');
+};
+settingsEl.onclick=e=>{ if(e.target===settingsEl) settingsEl.classList.remove('show'); };
+
+let MODE='demo';
+const modesEl=document.getElementById('modes');
+modesEl.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  setMode(b.dataset.mode);
+});
+function setMode(m){
+  if(m===MODE) return;
+  if(jobRunning){ addSys('ジョブ実行中はモードを変更できません'); return; }
+  if(m==='ai' && !SETTINGS.apiKey){ openSettings(); addSys('AIモードにはAPIキーが必要です'); }
+  if(MODE==='live') disconnectLive();
+  MODE=m;
+  modesEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  const inputEl=document.getElementById('cmdInput');
+  if(m==='live'){
+    inputEl.placeholder='LIVEモード: Claude Codeの実セッションを中継中（指示はターミナルから）';
+    inputEl.disabled=true; sendBtn.disabled=true;
+    connectLive();
+  }else{
+    inputEl.disabled=false; sendBtn.disabled=false;
+    inputEl.placeholder = m==='ai'
+      ? 'Opusに作らせたいものを入力（例：温泉旅館のLP作って）'
+      : 'やってほしいことを入力（例：LP作って / バグ直して / 記事書いて）';
+    setStatus(m==='ai' ? 'AIモード — Opusが台本と成果物を生成します' : '待機中 — 指示をどうぞ', false);
+    addSys(m==='ai' ? 'AIモード: 会話も成果物も claude-opus-4-8 がリアルタイム生成します' : 'デモモード: 台本による演出です');
+  }
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+const confettiCanvas=document.getElementById('confetti');
+const cctx=confettiCanvas.getContext('2d');
+let confetti=[]; let confettiRunning=false;
+function fireConfetti(){
+  const w=confettiCanvas.width=confettiCanvas.offsetWidth;
+  const h=confettiCanvas.height=confettiCanvas.offsetHeight;
+  const colors=['#e0b15c','#e07a9c','#6aa6ff','#7ad19a','#c79bff','#ff9b6a','#fff'];
+  for(let i=0;i<140;i++){
+    confetti.push({
+      x:Math.random()*w, y:-20-Math.random()*h*0.3,
+      vx:(Math.random()-.5)*2.4, vy:2+Math.random()*3.5,
+      size:4+Math.random()*5, rot:Math.random()*Math.PI, vr:(Math.random()-.5)*.3,
+      color:colors[i%colors.length],
+    });
+  }
+  if(!confettiRunning){ confettiRunning=true; requestAnimationFrame(confettiTick); }
+}
+function confettiTick(){
+  const w=confettiCanvas.width, h=confettiCanvas.height;
+  cctx.clearRect(0,0,w,h);
+  confetti=confetti.filter(p=>p.y<h+20);
+  for(const p of confetti){
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.vy+=0.03;
+    cctx.save(); cctx.translate(p.x,p.y); cctx.rotate(p.rot);
+    cctx.fillStyle=p.color; cctx.fillRect(-p.size/2,-p.size/3,p.size,p.size*0.66);
+    cctx.restore();
+  }
+  if(confetti.length){ requestAnimationFrame(confettiTick); }
+  else { confettiRunning=false; cctx.clearRect(0,0,w,h); }
+}
+
+/* ============================================================
+   OFFICE MONITOR (streaming code display)
+   ============================================================ */
+const monitorEl=document.getElementById('monitor');
+const monitorBody=document.getElementById('monitorBody');
+const monitorTitle=document.getElementById('monitorTitle');
+function monitorOpen(title){ monitorTitle.textContent=title; monitorBody.textContent=''; monitorEl.classList.add('show'); }
+function monitorAppend(text){
+  monitorBody.textContent+=text;
+  if(monitorBody.textContent.length>12000) monitorBody.textContent=monitorBody.textContent.slice(-9000);
+  monitorBody.scrollTop=monitorBody.scrollHeight;
+}
+function monitorClose(){ monitorEl.classList.remove('show'); }
+
+/* ============================================================
+   AI MODE — 本物の claude-opus-4-8 が台本と成果物を生成
+   静的ページ(ビルドなし)のため raw fetch + CORS 直接アクセスヘッダを使用
+   ============================================================ */
+const API_URL='https://api.anthropic.com/v1/messages';
+const MODEL='claude-opus-4-8';
+
+async function anthropicFetch(body){
+  const key=SETTINGS.apiKey;
+  if(!key){ openSettings(); throw new Error('APIキーが未設定です'); }
+  const res=await fetch(API_URL,{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true',
+    },
+    body:JSON.stringify(body),
+  });
+  if(!res.ok){
+    const errText=await res.text().catch(()=> '');
+    if(res.status===401){ openSettings(); throw new Error('APIキーが無効です (401)'); }
+    throw new Error('APIエラー '+res.status+': '+errText.slice(0,180));
+  }
+  return res;
+}
+
+/* --- 台本(screenplay)を構造化出力で1回のAPI呼び出しで取得 --- */
+const SCREENPLAY_SCHEMA={
+  type:'object', additionalProperties:false,
+  required:['title','deliverable','steps'],
+  properties:{
+    title:{type:'string',description:'成果物のタイトル(日本語、20字以内)'},
+    deliverable:{type:'string',enum:['lp','article','none'],description:'成果物の種類。Webページ系はlp、文章系はarticle'},
+    steps:{type:'array',items:{
+      type:'object', additionalProperties:false,
+      required:['agent','action','text','seconds'],
+      properties:{
+        agent:{type:'string',enum:['pm','design','front','back','write','qa']},
+        action:{type:'string',enum:['say','work','emote']},
+        text:{type:'string',description:'say: セリフ(日本語35字以内、性格を出す)。work: 完了報告(35字以内)。emote: 絵文字1つ'},
+        seconds:{type:'number',description:'workの作業秒数(2〜5)。say/emoteは0'},
+      },
+    }},
+  },
+};
+const SCREENPLAY_SYSTEM=`あなたは小さなWeb制作スタジオ「KAIDO STUDIO」のシミュレーション台本作家です。
+チーム: pm=マネジャー(仕切り屋・明るい) / design=アオイ(デザイナー・こだわり派) / front=リク(フロントエンド・寡黙で優秀) / back=ハル(バックエンド・理屈っぽい) / write=ナギ(ライター・言葉に敏感) / qa=ソウ(QA・鋭い)。
+ユーザーの依頼に対し、チームが協働して完成させるまでの台本をJSONで出力する。
+構成: (1)pmが依頼内容を宣言し担当を割り振るsay 2-3個 → (2)担当者の意気込みsayやemote → (3)workステップ(担当ごとに1-2個、間に短い掛け合いsayを挟む) → (4)qaのチェックwork → (5)pmの完了宣言say。
+合計12〜18ステップ。セリフは日本語で自然に、キャラの性格を出す。依頼に関係ない役職は登場させなくてよい。`;
+
+async function fetchScreenplay(userText){
+  const res=await anthropicFetch({
+    model:MODEL, max_tokens:3000,
+    system:SCREENPLAY_SYSTEM,
+    output_config:{format:{type:'json_schema',schema:SCREENPLAY_SCHEMA},effort:'low'},
+    messages:[{role:'user',content:userText}],
+  });
+  const data=await res.json();
+  if(data.stop_reason==='refusal') throw new Error('リクエストが拒否されました');
+  const text=data.content.find(b=>b.type==='text')?.text||'{}';
+  return JSON.parse(text);
+}
+
+/* --- 成果物をストリーミング生成 (SSEをパースしてモニターに流す) --- */
+async function streamDeliverable(kind, userText, title, onDelta){
+  const sys= kind==='lp'
+    ? '完結した単一ファイルのHTMLランディングページを出力せよ。外部依存なし(CSS/JSインライン)、日本語、レスポンシブ、洗練されたデザイン。HTMLコードのみを出力し、説明文やマークダウンのコードフェンスは一切含めない。<!DOCTYPE html>から始めること。'
+    : '依頼に応じた日本語の記事・文章を書け。マークダウン形式。本文のみを出力し、前置きは不要。';
+  const res=await anthropicFetch({
+    model:MODEL, max_tokens:16000, stream:true,
+    system:sys,
+    output_config:{effort:'medium'},
+    messages:[{role:'user',content:'依頼: '+userText+'\nタイトル: '+title}],
+  });
+  const reader=res.body.getReader();
+  const decoder=new TextDecoder();
+  let buf='', full='';
+  while(true){
+    const {done,value}=await reader.read();
+    if(done) break;
+    buf+=decoder.decode(value,{stream:true});
+    const lines=buf.split('\n'); buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith('data: ')) continue;
+      let ev; try{ ev=JSON.parse(line.slice(6)); }catch{ continue; }
+      if(ev.type==='content_block_delta' && ev.delta?.type==='text_delta'){
+        full+=ev.delta.text; onDelta(ev.delta.text);
+      }
+      if(ev.type==='message_delta' && ev.delta?.stop_reason==='refusal')
+        throw new Error('生成が拒否されました');
+    }
+  }
+  // コードフェンスで囲まれていたら剥がす
+  return full.replace(/^```[a-z]*\n?/,'').replace(/\n?```\s*$/,'').trim();
+}
+
+/* --- AIジョブ本体: 台本取得 → 演技 & 並行で成果物生成 --- */
+async function runAIJob(userText){
+  const pm=byId.pm;
+  setStatus('Opusが計画中…', true);
+  addSys('AIモード: claude-opus-4-8 に台本を依頼');
+  await pm.moveTo(MEETING.x, MEETING.y-14);
+  pm.say('Opusと相談して段取り組むね…',{dur:2600,think:true});
+
+  let play;
+  try{ play=await fetchScreenplay(userText||'なにか作って'); }
+  catch(e){ pm.say('ごめん、計画に失敗した…',{dur:2600}); addSys('❌ '+e.message); pm.toDesk(); throw e; }
+
+  const steps=Array.isArray(play.steps)?play.steps:[];
+  const title=play.title||'成果物';
+  addSys('台本受信: '+steps.length+'ステップ / 成果物: '+(play.deliverable||'none'));
+
+  // 成果物の生成をバックグラウンドで開始(モニターにストリーミング表示)
+  let genPromise=null;
+  if(play.deliverable==='lp'||play.deliverable==='article'){
+    const fname=play.deliverable==='lp'?'landing-page.html':'article.md';
+    monitorOpen('opus@front-desk — '+fname);
+    genPromise=streamDeliverable(play.deliverable,userText,title,monitorAppend)
+      .catch(e=>{ addSys('❌ 生成エラー: '+e.message); return null; });
+  }
+
+  // 台本を演じる
+  const involved=[...new Set(steps.filter(s=>s.agent&&s.agent!=='pm').map(s=>s.agent))]
+    .filter(id=>byId[id]);
+  setStatus('チーム稼働中… (会話はOpus生成)', true);
+  if(involved.length) await gatherTeam(involved);
+  let dismissed=false;
+  for(const st of steps){
+    const a=byId[st.agent]; if(!a) continue;
+    if(st.action==='say'){
+      a.say(String(st.text||'').slice(0,60),{dur:Math.max(2000,String(st.text||'').length*95)});
+      await sleep(Math.max(1400,String(st.text||'').length*80));
+    }else if(st.action==='work'){
+      if(!dismissed&&involved.length){ await dismiss(involved); dismissed=true; await sleep(300); }
+      await a.work(clamp(Number(st.seconds)||3,1.5,6)*1000);
+      if(st.text) addDone(st.agent,String(st.text).slice(0,80));
+    }else if(st.action==='emote'){
+      a.emote(String(st.text||'✨').slice(0,4));
+      await sleep(400);
+    }
+  }
+  if(!dismissed&&involved.length) await dismiss(involved);
+
+  // 成果物の完成を待つ
+  if(genPromise){
+    setStatus('Opusが成果物を仕上げ中…', true);
+    byId.front.setState('working'); byId.front.el.classList.add('indet');
+    const result=await genPromise;
+    byId.front.el.classList.remove('indet'); byId.front.setState('idle');
+    monitorClose();
+    if(result){
+      await pm.moveTo(MEETING.x,MEETING.y-8);
+      pm.emote('🎉'); pm.say('完成！納品します🎉',{dur:2600});
+      addSys('✔ 納品完了: '+(play.deliverable==='lp'?'landing-page.html':'article.md'));
+      celebrate();
+      showGeneratedDeliverable(play.deliverable,result,title);
+      pm.toDesk();
+      return;
+    }
+  }
+  await pm.moveTo(MEETING.x,MEETING.y-8);
+  pm.emote('🎉'); pm.say('タスク完了！',{dur:2200});
+  celebrate(); pm.toDesk();
+}
+
+/* --- 生成された成果物をiframe/テキストで表示 --- */
+function showGeneratedDeliverable(kind, content, title){
+  const card=document.getElementById('deliverCard');
+  card.classList.add('wide');
+  document.getElementById('deliverName').textContent = kind==='lp'?'landing-page.html':'article.md';
+  const blob=new Blob([content],{type:kind==='lp'?'text/html':'text/markdown'});
+  const url=URL.createObjectURL(blob);
+  if(kind==='lp'){
+    lpPreview.innerHTML='';
+    const frame=document.createElement('iframe');
+    frame.className='lp-frame';
+    frame.sandbox='allow-same-origin'; // 生成コードのJSは実行しない
+    frame.srcdoc=content;
+    lpPreview.appendChild(frame);
+  }else{
+    lpPreview.innerHTML='<pre style="max-height:60vh;overflow:auto;padding:20px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#1a1d26"></pre>';
+    lpPreview.querySelector('pre').textContent=content;
+  }
+  const actions=document.createElement('div');
+  actions.className='actions';
+  actions.innerHTML=`<a class="primary" download="${kind==='lp'?'landing-page.html':'article.md'}" href="${url}">⬇ ダウンロード</a>`;
+  lpPreview.appendChild(actions);
+  deliver.classList.add('show');
+}
+
+/* ============================================================
+   LIVE MODE — 実際のClaude Codeセッションを中継
+   node tools/agents-bridge.mjs が ~/.claude/projects のログをSSE配信
+   ============================================================ */
+let es=null;
+const liveActive=new Set();          // 進行中のサブエージェント chain id
+const liveAssign=new Map();          // sidechain chain id -> team member id
+const LIVE_POOL=['front','back','design','write','qa'];
+let livePoolIdx=0;
+
+const TOOL_CHAR={ Bash:'front', Write:'front', Edit:'front', NotebookEdit:'front',
+  Read:'qa', Grep:'qa', Glob:'qa', WebSearch:'write', WebFetch:'write', Workflow:'back' };
+const TOOL_ICON={ Bash:'⚙️', Write:'📝', Edit:'✏️', Read:'📖', Grep:'🔍', Glob:'🗂️',
+  WebSearch:'🌐', WebFetch:'🌐', Workflow:'🧩', NotebookEdit:'📓' };
+
+function connectLive(){
+  disconnectLive();
+  setStatus('LIVE — ブリッジに接続中…', true);
+  try{ es=new EventSource(SETTINGS.bridge); }
+  catch(e){ addSys('❌ 接続失敗: '+e.message); return; }
+  es.onopen=()=>{ setStatus('LIVE — Claude Codeセッションを中継中', true); };
+  es.onerror=()=>{ setStatus('LIVE — 接続待ち (bridgeを起動してください)', false); };
+  es.onmessage=e=>{ try{ handleLiveEvent(JSON.parse(e.data)); }catch{} };
+}
+function disconnectLive(){
+  if(es){ es.close(); es=null; }
+  liveAssign.clear(); liveActive.clear(); livePoolIdx=0;
+  TEAM.forEach(a=>{ const ag=byId[a.id]; ag.el.classList.remove('indet'); ag.setState('idle'); ag.toDesk(); });
+  monitorClose();
+}
+function liveCharFor(chain){
+  if(liveAssign.has(chain)) return byId[liveAssign.get(chain)];
+  // 空いてるメンバーを優先して割り当て
+  let pick=LIVE_POOL.find(id=>byId[id].state==='idle' && ![...liveAssign.values()].includes(id));
+  if(!pick){ pick=LIVE_POOL[livePoolIdx++ % LIVE_POOL.length]; }
+  liveAssign.set(chain,pick);
+  return byId[pick];
+}
+function setLiveWorking(agent,on){
+  agent.el.classList.toggle('indet',on);
+  agent.setState(on?'working':'idle');
+  agent.workFill.style.width=on?'40%':'0%';
+}
+async function handleLiveEvent(ev){
+  if(ev.replay) return;                 // 接続時の過去ログ再生は演出しない
+  switch(ev.t){
+    case 'hello':
+      addSys('LIVE接続 OK'+(ev.session?' — session '+ev.session.slice(0,8):''));
+      break;
+    case 'session':
+      addSys('セッション切替: '+ev.file);
+      break;
+    case 'user':
+      addMsg(null,'👤 '+ev.text);
+      byId.pm.emote('📥');
+      break;
+    case 'assistant_text':
+      if(ev.sidechain){
+        const c=liveCharFor(ev.chain);
+        c.say(ev.text.slice(0,50),{dur:3000,log:false});
+        addMsg(c.id,ev.text.slice(0,180));
+      }else{
+        byId.pm.say(ev.text.slice(0,50),{dur:3200,log:false});
+        addMsg('pm',ev.text.slice(0,220));
+      }
+      break;
+    case 'tool_use': {
+      const who = ev.sidechain ? liveCharFor(ev.chain) : byId[TOOL_CHAR[ev.name]||'back'];
+      who.emote(TOOL_ICON[ev.name]||'🔧');
+      if(!ev.sidechain){
+        // 単発ツール: ちょっとだけ作業モーション
+        setLiveWorking(who,true);
+        clearTimeout(who._liveT);
+        who._liveT=setTimeout(()=>{ if(!ev.sidechain&&![...liveAssign.values()].includes(who.id)) setLiveWorking(who,false); },1800);
+      }
+      addSys((who.name)+' › '+ev.name+(ev.detail?': '+ev.detail:''));
+      break;
+    }
+    case 'delegate':
+      byId.pm.say('サブエージェント起動: '+ev.desc.slice(0,30),{dur:2800,log:false});
+      addMsg('pm','サブエージェントに依頼 → '+ev.desc);
+      byId.pm.emote('📣');
+      break;
+    case 'agent_spawn': {
+      const c=liveCharFor(ev.chain);
+      addSys('▶ '+c.name+' がタスク受領: '+ev.task.slice(0,80));
+      liveActive.add(ev.chain);
+      // 演出は非同期で流し、完了イベントとのレースを liveActive で防ぐ
+      (async()=>{
+        await c.moveTo(MEETING.x+(Math.random()*10-5), MEETING.y-6);
+        c.say('担当します！',{dur:1600,log:false});
+        await sleep(600);
+        await c.toDesk();
+        if(liveActive.has(ev.chain)) setLiveWorking(c,true);
+      })();
+      break;
+    }
+    case 'agent_done': {
+      if(!liveAssign.has(ev.chain)) break;
+      liveActive.delete(ev.chain);
+      const c=byId[liveAssign.get(ev.chain)];
+      setLiveWorking(c,false);
+      c.emote('✅');
+      addDone(c.id,'サブエージェント完了');
+      liveAssign.delete(ev.chain);
+      break;
+    }
+    case 'tool_result':
+      break; // 今は表示しない
+  }
+}
+
 /* ============ command handling ============ */
 const input=document.getElementById('cmdInput');
 const sendBtn=document.getElementById('cmdSend');
@@ -891,15 +1405,17 @@ function pickWorkflow(text){
   return WORKFLOWS.feature; // default
 }
 async function dispatch(text){
-  if(jobRunning) return;
+  if(jobRunning || MODE==='live') return;
   text=(text||'').trim();
   jobRunning=true;
   sendBtn.disabled=true; input.value='';
   if(hintEl){ hintEl.style.opacity='0'; }
   addMsg(null, '👤 あなた: 「'+(text||'なにか作って')+'」');
-  const wf=pickWorkflow(text);
-  try{ await wf.run(text); }
-  catch(e){ console.error(e); addSys('エラーが発生しました'); }
+  try{
+    if(MODE==='ai'){ await runAIJob(text); }
+    else{ await pickWorkflow(text).run(text); }
+  }
+  catch(e){ console.error(e); addSys('エラーが発生しました: '+(e.message||e)); }
   finally{
     jobRunning=false; sendBtn.disabled=false;
     setStatus('待機中 — 次の指示をどうぞ', false);
