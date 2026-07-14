@@ -349,6 +349,24 @@ body{
   25%{opacity:1;transform:translateX(-50%) translateY(-6px) scale(1.15)}
   100%{opacity:0;transform:translateX(-50%) translateY(-22px) scale(.9)}}
 
+/* mood (表情差分) — 頭の右横の表情マーク + スプライトへのCSSフィルタ */
+.moodmark{
+  position:absolute;top:-2px;right:-16px;z-index:2;
+  font-size:14px;line-height:1;pointer-events:none;opacity:0;
+}
+.moodmark.pop{opacity:1;animation:moodpop .3s ease-out}
+@keyframes moodpop{0%{transform:scale(.4)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+/* スプライトは既存の drop-shadow を残して合成 */
+.agent[data-mood="happy"]    .avatar.sprite img{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35)) brightness(1.12) saturate(1.15)}
+.agent[data-mood="focused"]  .avatar.sprite img{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35)) contrast(1.08)}
+.agent[data-mood="troubled"] .avatar.sprite img{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35)) hue-rotate(-15deg) brightness(.92)}
+.agent[data-mood="tired"]    .avatar.sprite img{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35)) grayscale(.45) brightness(.9)}
+/* 絵文字アバターは .avatar 自体にフィルタ */
+.agent[data-mood="happy"]    .avatar:not(.sprite){filter:brightness(1.12) saturate(1.15)}
+.agent[data-mood="focused"]  .avatar:not(.sprite){filter:contrast(1.08)}
+.agent[data-mood="troubled"] .avatar:not(.sprite){filter:hue-rotate(-15deg) brightness(.92)}
+.agent[data-mood="tired"]    .avatar:not(.sprite){filter:grayscale(.45) brightness(.9)}
+
 /* ============ SIDE PANEL ============ */
 .side{
   grid-area:side;
@@ -463,6 +481,23 @@ body{
   background:rgba(18,20,29,.7);padding:6px 14px;border-radius:999px;border:1px solid var(--line);
   transition:opacity .4s}
 
+/* ---- 実況ティッカー (LIVEモードのテロップ) ---- */
+.ticker{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:16;
+  max-width:min(560px,86%);
+  font-family:var(--mono);font-size:12px;color:#fff2cf;letter-spacing:.02em;
+  background:rgba(10,12,18,.82);border:1px solid rgba(255,255,255,.12);
+  padding:7px 16px;border-radius:999px;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  pointer-events:none;transition:opacity .5s;
+}
+.ticker[hidden]{display:none}
+.ticker.fade{opacity:0}
+.ticker .ticker-line{display:inline-block;transition:transform .32s ease, opacity .32s ease}
+/* 新しい実況文は下から上へスライドイン */
+.ticker .ticker-line.enter{transform:translateY(12px);opacity:0}
+
 @media (max-width:820px){
   .app{grid-template-columns:1fr;grid-template-rows:auto 1fr 42vh;
     grid-template-areas:"top" "stage" "side"}
@@ -521,6 +556,7 @@ body{
   <!-- ===== STAGE ===== -->
   <div class="stage-wrap">
     <div class="hint" id="hint">下の入力欄に「LP作って」と打ってみてください ↓</div>
+    <div class="ticker" id="ticker" hidden><span class="ticker-line" id="tickerLine"></span></div>
     <div class="stage">
       <div class="floor"></div>
       <div class="world" id="world"><!-- furniture & agents injected here --></div>
@@ -677,6 +713,7 @@ class Agent{
         <div class="emote"></div>
         <div class="bubble"></div>
         ${avatar}
+        <div class="moodmark"></div>
         <div class="nametag">${this.name}<span class="role">${this.role} · <span class="model">opus</span></span></div>
       </div>`;
     world.appendChild(el);
@@ -691,6 +728,7 @@ class Agent{
     }
     this.bubbleEl=el.querySelector('.bubble');
     this.emoteEl=el.querySelector('.emote');
+    this.moodMark=el.querySelector('.moodmark');
     this.workFill=el.querySelector('.workbar > i');
     this.screen=document.getElementById('screen-'+this.id);
     this.place();
@@ -769,8 +807,25 @@ class Agent{
     this.emoteEl.classList.remove('pop'); void this.emoteEl.offsetWidth;
     this.emoteEl.classList.add('pop');
   }
+  /* ムード(表情差分)を設定。ttlMs後に自動でnormalへ戻る(タイマーは上書き制) */
+  setMood(mood, ttlMs){
+    clearTimeout(this._moodT);
+    if(!mood || mood==='normal'){
+      delete this.el.dataset.mood;
+      if(this.moodMark) this.moodMark.classList.remove('pop');
+      return;
+    }
+    this.el.dataset.mood=mood;
+    if(this.moodMark){
+      this.moodMark.textContent=MOOD_MARK[mood]||'';
+      this.moodMark.classList.remove('pop'); void this.moodMark.offsetWidth;
+      this.moodMark.classList.add('pop');
+    }
+    if(ttlMs) this._moodT=setTimeout(()=>this.setMood('normal'), ttlMs);
+  }
   async work(ms){
     this.setState('working');
+    this.setMood('focused');
     if(typeof SFX!=='undefined') SFX.tick();
     this.workFill.style.width='0%';
     const start=performance.now();
@@ -783,9 +838,11 @@ class Agent{
       requestAnimationFrame(step);
     });
     this.setState('idle');
+    this.setMood('happy', 5000);
   }
 }
 const STLABEL={idle:'待機',walking:'移動中',working:'作業中'};
+const MOOD_MARK={happy:'✨',focused:'🔥',troubled:'💧',tired:'💤'};
 
 /* ============ roster cards ============ */
 function buildRoster(){
@@ -1040,6 +1097,7 @@ async function runFeature(userText){
 /* ---------- confetti-ish celebrate ---------- */
 function celebrate(){
   TEAM.forEach((a,i)=>setTimeout(()=>byId[a.id].emote(['🎉','✨','🎊','👏','🥳'][i%5]), i*120));
+  TEAM.forEach(a=>byId[a.id].setMood('happy', 6000));
   if(typeof fireConfetti==='function') fireConfetti();
   if(typeof SFX!=='undefined') SFX.chime();
 }
@@ -1534,9 +1592,122 @@ function addErr(text){
 }
 function oops(agent){
   agent.emote('💦');
+  agent.setMood('troubled', 8000);
   agent.el.classList.remove('oops'); void agent.el.offsetWidth;
   agent.el.classList.add('oops');
 }
+
+/* ============================================================
+   実況ティッカー — LIVEモードをスポーツ中継風に賑やかにする
+   ============================================================ */
+const tickerEl=document.getElementById('ticker');
+const tickerLineEl=document.getElementById('tickerLine');
+let tickerQueue=[];
+let tickerTimer=null;      // 1.6秒間隔のポンプ
+let tickerFadeTimer=null;  // 最後の表示から6秒でフェードアウト
+
+/* イベント種別ごとの実況文プール ({name}=キャラ名 {detail}=対象 {n}=回数) */
+const TICKER_LINES={
+  bash:[
+    '{name}、コマンドを豪快に実行！','{name}のターミナルが火を噴く！',
+    '{name}、シェルに指令を叩き込む！','{name}、コマンド一発、勝負に出た！',
+    '{name}のキー捌きが冴える、実行だ！',
+  ],
+  read:[
+    '{name}、コードの海に潜る…','{name}の調査眼が光る！',
+    '{name}、ファイルを丹念に読み解く！','{name}、静かに手がかりを探る…',
+    '{name}、鋭い視線でログを追う！',
+  ],
+  write:[
+    '{name}、キーボードが唸る！','{name}、一気に書き上げる！',
+    '{name}のエディタが加速する！','{name}、コードを刻み込んでいく！',
+    '{name}、筆が乗ってきたぞ！',
+  ],
+  tool:[
+    '{name}、次の一手を繰り出す！','{name}、テンポよく作業を進める！',
+    '{name}、淀みなく手を動かす！','{name}、ツールを起動、抜かりなし！',
+  ],
+  spawn:[
+    '{name}に特命が下った！','{name}、単独ミッション開始！',
+    '{name}、颯爽と現場へ向かう！','{name}、新たな任務を受領だ！',
+    '{name}、出動、腕の見せどころ！',
+  ],
+  done:[
+    '{name}、ミッションコンプリート！お見事！','{name}、任務完了、仕事が速い！',
+    '{name}、やり切った、ナイスワーク！','{name}、完璧に決めた、さすがだ！',
+    '{name}、見事ゴールイン！',
+  ],
+  error:[
+    'おっと、{name}のツールが失敗だ…！','{name}、まさかのエラー発生！',
+    '{name}、ここでつまずいた…！','アクシデント、{name}の手が止まる…！',
+    '{name}、思わぬ落とし穴だ…！',
+  ],
+  combo3:[
+    '{name}、{n}連続実行！ノッてきた！','{name}、{n}連打、リズムに乗った！',
+    '{name}、止まらない{n}連続だ！','{name}、{n}連続、勢いがついてきた！',
+  ],
+  combo5:[
+    '{name}、驚異の{n}連続！誰にも止められない！','{name}、{n}連続の猛攻、会場が沸く！',
+    '{name}、圧巻の{n}連続実行だ！','{name}、{n}連続、これは伝説級だ！',
+  ],
+  milestone:[
+    '本日通算{n}ツール実行を達成！','記録更新、通算{n}ツール実行だ！',
+    'ついに通算{n}実行の大台へ！','チーム総力、{n}ツール実行を突破！',
+  ],
+};
+/* ツール名から実況プールを選ぶ */
+function tickerPoolForTool(name){
+  if(/Bash/i.test(name)) return 'bash';
+  if(/Read|Grep|Glob|Search|Fetch/i.test(name)) return 'read';
+  if(/Write|Edit|Notebook/i.test(name)) return 'write';
+  return 'tool';
+}
+function tickerFill(tpl,vars){ return tpl.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m); }
+/* プールからランダムに1文選んでティッカーに流す */
+function tickerSay(pool,vars){
+  const arr=TICKER_LINES[pool]; if(!arr||!arr.length) return;
+  ticker(tickerFill(arr[Math.floor(Math.random()*arr.length)], vars||{}));
+}
+/* キューに実況文を追加(最大8件、あふれたら古いものを捨てる) */
+function ticker(text){
+  if(MODE!=='live') return;
+  tickerQueue.push(text);
+  while(tickerQueue.length>8) tickerQueue.shift();
+  if(!tickerTimer) tickerPump();   // 待機中なら即座に1件表示
+}
+function tickerPump(){
+  if(!tickerQueue.length){ tickerTimer=null; return; }
+  tickerShow(tickerQueue.shift());
+  tickerTimer=setTimeout(tickerPump, 1600);
+}
+function tickerShow(text){
+  if(MODE!=='live') return;
+  tickerEl.hidden=false;
+  tickerEl.classList.remove('fade');
+  tickerLineEl.textContent=text;
+  // 下から上へスライドイン
+  tickerLineEl.classList.add('enter');
+  void tickerLineEl.offsetWidth;
+  tickerLineEl.classList.remove('enter');
+  clearTimeout(tickerFadeTimer);
+  tickerFadeTimer=setTimeout(tickerFadeOut, 6000);
+}
+function tickerFadeOut(){
+  tickerEl.classList.add('fade');
+  setTimeout(()=>{ if(tickerEl.classList.contains('fade')) tickerEl.hidden=true; }, 520);
+}
+function tickerReset(){
+  tickerQueue=[];
+  clearTimeout(tickerTimer); tickerTimer=null;
+  clearTimeout(tickerFadeTimer); tickerFadeTimer=null;
+  tickerEl.hidden=true; tickerEl.classList.remove('fade');
+  tickerLineEl.textContent='';
+}
+
+/* --- 実況カウンタ (コンボ & 通算マイルストーン) --- */
+let liveComboChar=null, liveComboCount=0, liveComboAt=0;
+let liveToolTotal=0;
+const LIVE_MILESTONES=[10,25,50,100];
 
 /* --- 並列サブエージェント集合演出 --- */
 let lastSpawnAt=0, rallyCooldownUntil=0;
@@ -1569,7 +1740,11 @@ function disconnectLive(){
   if(es){ es.close(); es=null; }
   liveAssign.clear(); liveActive.clear(); livePoolIdx=0;
   pendingTools.clear(); clearTaskBoard();
-  TEAM.forEach(a=>{ const ag=byId[a.id]; ag.el.classList.remove('indet'); ag.setState('idle'); ag.toDesk(); });
+  TEAM.forEach(a=>{ const ag=byId[a.id]; ag.el.classList.remove('indet');
+    clearTimeout(ag._tiredT); ag.setMood('normal'); ag.setState('idle'); ag.toDesk(); });
+  // 実況ティッカー & カウンタをリセット
+  tickerReset();
+  liveComboChar=null; liveComboCount=0; liveComboAt=0; liveToolTotal=0;
   monitorClose();
 }
 function liveCharFor(chain){
@@ -1584,6 +1759,16 @@ function setLiveWorking(agent,on){
   agent.el.classList.toggle('indet',on);
   agent.setState(on?'working':'idle');
   agent.workFill.style.width=on?'40%':'0%';
+  if(on){
+    agent.setMood('focused');
+    clearTimeout(agent._tiredT);
+    // 長時間作業が続いたら疲れ顔に
+    agent._tiredT=setTimeout(()=>{ if(agent.state==='working') agent.setMood('tired'); }, 45000);
+  }else{
+    clearTimeout(agent._tiredT);
+    // 直前にエラーで焦っている場合は happy で上書きしない
+    if(agent.el.dataset.mood!=='troubled') agent.setMood('happy', 5000);
+  }
 }
 async function handleLiveEvent(ev){
   if(ev.replay) return;                 // 接続時の過去ログ再生は演出しない
@@ -1621,6 +1806,19 @@ async function handleLiveEvent(ev){
         who._liveT=setTimeout(()=>{ if(!ev.sidechain&&![...liveAssign.values()].includes(who.id)) setLiveWorking(who,false); },1800);
       }
       addSys((who.name)+' › '+ev.name+(ev.detail?': '+ev.detail:''));
+      // --- 実況ティッカー ---
+      const nowTk=Date.now();
+      // 同一キャラの連続実行を20秒窓でカウント(他キャラが実行したらリセット)
+      if(liveComboChar===who.id && nowTk-liveComboAt<20000){ liveComboCount++; }
+      else { liveComboChar=who.id; liveComboCount=1; }
+      liveComboAt=nowTk;
+      // 通算カウント & マイルストーン
+      liveToolTotal++;
+      if(LIVE_MILESTONES.includes(liveToolTotal)) tickerSay('milestone',{n:liveToolTotal});
+      // 3連続・5連続は必ずコンボ実況、それ以外は60%の確率で実況
+      if(liveComboCount===5) tickerSay('combo5',{name:who.name,n:5});
+      else if(liveComboCount===3) tickerSay('combo3',{name:who.name,n:3});
+      else if(Math.random()<0.6) tickerSay(tickerPoolForTool(ev.name),{name:who.name,detail:ev.detail||''});
       break;
     }
     case 'tool_result': {
@@ -1630,6 +1828,15 @@ async function handleLiveEvent(ev){
         const who=p?p.who:byId.pm;
         oops(who);
         addErr((p?who.name+'の'+p.name:'ツール')+'が失敗: '+(ev.excerpt||'').slice(0,120));
+        tickerSay('error',{name:who.name});
+        // 同僚リアクション(40%): 待機中の他キャラが励ます
+        if(Math.random()<0.4){
+          const idlers=TEAM.map(t=>byId[t.id]).filter(a=>a!==who && a.state==='idle');
+          if(idlers.length){
+            const buddy=idlers[Math.floor(Math.random()*idlers.length)];
+            buddy.say(['大丈夫！？','ドンマイ！','切り替えていこ！','ナイスチャレンジ！'][Math.floor(Math.random()*4)],{log:false});
+          }
+        }
       }
       break;
     }
@@ -1665,6 +1872,7 @@ async function handleLiveEvent(ev){
     case 'agent_spawn': {
       const c=liveCharFor(ev.chain);
       addSys('▶ '+c.name+' がタスク受領: '+ev.task.slice(0,80));
+      tickerSay('spawn',{name:c.name});
       liveActive.add(ev.chain);
       maybeRally(); // 短時間に複数起動ならPMが号令
       // 演出は非同期で流し、完了イベントとのレースを liveActive で防ぐ
@@ -1684,6 +1892,12 @@ async function handleLiveEvent(ev){
       setLiveWorking(c,false);
       c.emote('✅');
       addDone(c.id,'サブエージェント完了');
+      tickerSay('done',{name:c.name});
+      // 同僚リアクション(40%): 他キャラが拍手
+      if(Math.random()<0.4){
+        const others=TEAM.map(t=>byId[t.id]).filter(a=>a!==c);
+        if(others.length) others[Math.floor(Math.random()*others.length)].emote('👏');
+      }
       liveAssign.delete(ev.chain);
       break;
     }
