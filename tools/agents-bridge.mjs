@@ -88,13 +88,23 @@ function handleLine(line, chainFromFile, replay) {
     } else if (Array.isArray(content)) {
       for (const block of content) {
         if (block.type === 'tool_result') {
-          broadcast({ t: 'tool_result', sidechain, chain, id: block.tool_use_id, replay });
+          const txt = typeof block.content === 'string' ? block.content
+            : Array.isArray(block.content) ? block.content.map(b => b.text || '').join(' ') : '';
+          broadcast({
+            t: 'tool_result', sidechain, chain, id: block.tool_use_id,
+            isError: !!block.is_error, excerpt: txt.slice(0, 160), replay,
+          });
           if (!sidechain) {
             // Agent ツールの結果には "agentId: xxxx" が含まれる → サブエージェント完了
-            const txt = typeof block.content === 'string' ? block.content
-              : Array.isArray(block.content) ? block.content.map(b => b.text || '').join(' ') : '';
             const m = txt.match(/agentId:\s*([a-z0-9]+)/);
             if (m) markDone('agent-' + m[1], replay);
+            // TaskCreate の結果 "Task #N created successfully: <subject>" → ボードに追加
+            if (pendingTaskCreates.has(block.tool_use_id)) {
+              const subject = pendingTaskCreates.get(block.tool_use_id);
+              pendingTaskCreates.delete(block.tool_use_id);
+              const tm = txt.match(/#(\d+)/);
+              broadcast({ t: 'task_add', id: tm ? tm[1] : block.tool_use_id, subject, replay });
+            }
           }
         } else if (block.type === 'text' && !sidechain) {
           broadcast({ t: 'user', text: String(block.text || '').slice(0, 300), replay });
@@ -118,6 +128,24 @@ function handleLine(line, chainFromFile, replay) {
           desc: String(input.description || input.prompt || '').slice(0, 140),
           agentType: input.subagent_type || '', replay,
         });
+      } else if (name === 'TodoWrite' && Array.isArray(input.todos)) {
+        // 標準Claude CodeのTODOリスト → ボード全置換
+        broadcast({
+          t: 'todos', replay,
+          todos: input.todos.map(td => ({
+            content: String(td.content || '').slice(0, 80),
+            status: td.status || 'pending',
+          })),
+        });
+      } else if (name === 'TaskCreate') {
+        // 実IDは tool_result 側で判明するので保留
+        pendingTaskCreates.set(block.id, String(input.subject || input.description || '').slice(0, 80));
+      } else if (name === 'TaskUpdate') {
+        broadcast({
+          t: 'task_update', replay,
+          id: String(input.taskId || ''), status: input.status || '',
+          subject: input.subject ? String(input.subject).slice(0, 80) : '',
+        });
       } else {
         const detail = String(input.description || input.file_path || input.pattern || input.command || input.query || '').slice(0, 120);
         broadcast({ t: 'tool_use', sidechain, chain, id: block.id, name, detail, replay });
@@ -126,6 +154,7 @@ function handleLine(line, chainFromFile, replay) {
   }
 }
 
+const pendingTaskCreates = new Map(); // tool_use id -> subject
 const doneChains = new Set();
 function markDone(chain, replay = false) {
   if (doneChains.has(chain)) return;

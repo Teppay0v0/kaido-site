@@ -130,6 +130,38 @@ body{
 .agent.working.indet .workbar > i{width:40% !important;animation:indet 1s linear infinite}
 @keyframes indet{0%{margin-left:-40%}100%{margin-left:100%}}
 
+/* ---- task board (whiteboard) ---- */
+.taskboard{
+  position:absolute;left:14px;top:14px;z-index:17;
+  width:min(300px,34%);max-height:56%;display:none;flex-direction:column;
+  border-radius:12px;overflow:hidden;
+  background:rgba(248,247,241,.97);color:#23262f;
+  border:1px solid #d8d5c8;box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+.taskboard.show{display:flex;animation:slidein .3s}
+.taskboard .thead{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:#6b6a5e;
+  border-bottom:2px solid var(--accent);background:#f1efe6;
+}
+.taskboard .thead .cnt{margin-left:auto;font-weight:600;color:#a09d8c}
+.taskboard ul{list-style:none;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin}
+.taskboard li{
+  font-size:11.5px;line-height:1.45;padding:6px 9px;border-radius:8px;
+  background:#fff;border:1px solid #e5e2d5;display:flex;gap:7px;align-items:flex-start;
+}
+.taskboard li .ic{flex:none}
+.taskboard li.in_progress{border-color:var(--accent);background:#fdf6e7;font-weight:700}
+.taskboard li.in_progress .ic{animation:beat 1.2s infinite}
+.taskboard li.completed{opacity:.5;text-decoration:line-through}
+
+/* error log entry */
+.msg.err .txt{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.45);color:#ffb3b3;font-family:var(--mono);font-size:11px}
+.msg.err .who{display:none}
+/* character error shake */
+.agent.oops .avatar{animation:oops .5s ease-in-out 2 !important}
+@keyframes oops{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px) rotate(-3deg)}75%{transform:translateX(3px) rotate(3deg)}}
+
 /* confetti canvas */
 #confetti{position:absolute;inset:0;z-index:35;pointer-events:none}
 
@@ -448,6 +480,12 @@ body{
       <div class="world" id="world"><!-- furniture & agents injected here --></div>
     </div>
     <canvas id="confetti"></canvas>
+
+    <!-- sprint board (real session tasks in LIVE mode) -->
+    <div class="taskboard" id="taskboard">
+      <div class="thead">📋 SPRINT BOARD <span class="cnt" id="taskCount"></span></div>
+      <ul id="taskList"></ul>
+    </div>
 
     <!-- big office code monitor (Opus streaming output) -->
     <div class="monitor" id="monitor">
@@ -1025,7 +1063,9 @@ function setMode(m){
   if(m==='ai' && !SETTINGS.apiKey){ openSettings(); addSys('AIモードにはAPIキーが必要です'); }
   if(MODE==='live') disconnectLive();
   MODE=m;
+  if(hintEl) hintEl.style.opacity='0';
   modesEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  renderTaskBoard();
   const inputEl=document.getElementById('cmdInput');
   if(m==='live'){
     inputEl.placeholder='LIVEモード: Claude Codeの実セッションを中継中（指示はターミナルから）';
@@ -1297,6 +1337,61 @@ const TOOL_CHAR={ Bash:'front', Write:'front', Edit:'front', NotebookEdit:'front
 const TOOL_ICON={ Bash:'⚙️', Write:'📝', Edit:'✏️', Read:'📖', Grep:'🔍', Glob:'🗂️',
   WebSearch:'🌐', WebFetch:'🌐', Workflow:'🧩', NotebookEdit:'📓' };
 
+/* --- 実行中ツールの追跡 (結果のエラー演出用) --- */
+const pendingTools=new Map();        // tool_use id -> {who, name, detail}
+
+/* --- タスクボード (実セッションのTODO) --- */
+const taskBoard=new Map();           // id -> {subject, status}
+const taskboardEl=document.getElementById('taskboard');
+const taskListEl=document.getElementById('taskList');
+const TASK_ICON={pending:'☐', in_progress:'🔨', completed:'✅'};
+function renderTaskBoard(){
+  const items=[...taskBoard.values()];
+  taskboardEl.classList.toggle('show', MODE==='live' && items.length>0);
+  const done=items.filter(t=>t.status==='completed').length;
+  document.getElementById('taskCount').textContent=done+'/'+items.length;
+  taskListEl.innerHTML='';
+  for(const t of items){
+    const li=document.createElement('li');
+    li.className=t.status;
+    li.innerHTML='<span class="ic">'+(TASK_ICON[t.status]||'☐')+'</span><span></span>';
+    li.querySelector('span:last-child').textContent=t.subject;
+    taskListEl.appendChild(li);
+  }
+}
+function clearTaskBoard(){ taskBoard.clear(); renderTaskBoard(); }
+
+/* --- エラーログ --- */
+function addErr(text){
+  const m=document.createElement('div'); m.className='msg err';
+  m.innerHTML='<div class="txt"></div>';
+  m.querySelector('.txt').textContent='⚠ '+text;
+  logEl.appendChild(m); trimLog(); logEl.scrollTop=logEl.scrollHeight;
+}
+function oops(agent){
+  agent.emote('💦');
+  agent.el.classList.remove('oops'); void agent.el.offsetWidth;
+  agent.el.classList.add('oops');
+}
+
+/* --- 並列サブエージェント集合演出 --- */
+let lastSpawnAt=0, rallyCooldownUntil=0;
+async function maybeRally(){
+  const now=Date.now();
+  const burst = now-lastSpawnAt < 6000;   // 直前6秒以内に別のspawnがあった
+  lastSpawnAt=now;
+  if(!burst || now<rallyCooldownUntil) return;
+  rallyCooldownUntil=now+20000;
+  const pm=byId.pm;
+  if(pm.state!=='idle') return;
+  await pm.moveTo(MEETING.x, MEETING.y-14);
+  pm.emote('📣');
+  pm.say('並列でいくよ、手分けして！',{dur:2600,log:false});
+  addMsg('pm','並列でいくよ、手分けして！');
+  await sleep(2200);
+  if(pm.state==='idle') pm.toDesk();
+}
+
 function connectLive(){
   disconnectLive();
   setStatus('LIVE — ブリッジに接続中…', true);
@@ -1309,6 +1404,7 @@ function connectLive(){
 function disconnectLive(){
   if(es){ es.close(); es=null; }
   liveAssign.clear(); liveActive.clear(); livePoolIdx=0;
+  pendingTools.clear(); clearTaskBoard();
   TEAM.forEach(a=>{ const ag=byId[a.id]; ag.el.classList.remove('indet'); ag.setState('idle'); ag.toDesk(); });
   monitorClose();
 }
@@ -1333,6 +1429,7 @@ async function handleLiveEvent(ev){
       break;
     case 'session':
       addSys('セッション切替: '+ev.file);
+      clearTaskBoard(); pendingTools.clear();
       break;
     case 'user':
       addMsg(null,'👤 '+ev.text);
@@ -1350,6 +1447,8 @@ async function handleLiveEvent(ev){
       break;
     case 'tool_use': {
       const who = ev.sidechain ? liveCharFor(ev.chain) : byId[TOOL_CHAR[ev.name]||'back'];
+      pendingTools.set(ev.id,{who,name:ev.name,detail:ev.detail||''});
+      if(pendingTools.size>200) pendingTools.delete(pendingTools.keys().next().value);
       who.emote(TOOL_ICON[ev.name]||'🔧');
       if(!ev.sidechain){
         // 単発ツール: ちょっとだけ作業モーション
@@ -1358,6 +1457,40 @@ async function handleLiveEvent(ev){
         who._liveT=setTimeout(()=>{ if(!ev.sidechain&&![...liveAssign.values()].includes(who.id)) setLiveWorking(who,false); },1800);
       }
       addSys((who.name)+' › '+ev.name+(ev.detail?': '+ev.detail:''));
+      break;
+    }
+    case 'tool_result': {
+      const p=pendingTools.get(ev.id);
+      if(p) pendingTools.delete(ev.id);
+      if(ev.isError){
+        const who=p?p.who:byId.pm;
+        oops(who);
+        addErr((p?who.name+'の'+p.name:'ツール')+'が失敗: '+(ev.excerpt||'').slice(0,120));
+      }
+      break;
+    }
+    case 'todos':
+      // TodoWrite: ボード全置換
+      taskBoard.clear();
+      ev.todos.forEach((td,i)=>taskBoard.set('todo-'+i,{subject:td.content,status:td.status}));
+      renderTaskBoard();
+      byId.pm.emote('📋');
+      break;
+    case 'task_add':
+      taskBoard.set(String(ev.id),{subject:ev.subject,status:'pending'});
+      renderTaskBoard();
+      byId.pm.emote('📋');
+      addSys('ボードに追加: '+ev.subject);
+      break;
+    case 'task_update': {
+      const t=taskBoard.get(String(ev.id));
+      if(ev.status==='deleted'){ taskBoard.delete(String(ev.id)); }
+      else if(t){
+        if(ev.status) t.status=ev.status;
+        if(ev.subject) t.subject=ev.subject;
+        if(ev.status==='completed'){ byId.pm.emote('✅'); addSys('✔ タスク完了: '+t.subject); }
+      }
+      renderTaskBoard();
       break;
     }
     case 'delegate':
@@ -1369,6 +1502,7 @@ async function handleLiveEvent(ev){
       const c=liveCharFor(ev.chain);
       addSys('▶ '+c.name+' がタスク受領: '+ev.task.slice(0,80));
       liveActive.add(ev.chain);
+      maybeRally(); // 短時間に複数起動ならPMが号令
       // 演出は非同期で流し、完了イベントとのレースを liveActive で防ぐ
       (async()=>{
         await c.moveTo(MEETING.x+(Math.random()*10-5), MEETING.y-6);
@@ -1389,8 +1523,6 @@ async function handleLiveEvent(ev){
       liveAssign.delete(ev.chain);
       break;
     }
-    case 'tool_result':
-      break; // 今は表示しない
   }
 }
 
