@@ -264,7 +264,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`[bridge] KAIDO STUDIO bridge`);
+  console.log(`[bridge] トイワホ製作所 (TOIWAHO WORKS) bridge`);
   console.log(`[bridge] site   : http://localhost:${PORT}/agents.html`);
   console.log(`[bridge] events : http://localhost:${PORT}/events`);
   console.log(`[bridge] project: ${projectCwd}`);
