@@ -17,6 +17,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { spawn } from 'node:child_process';
 
 const PORT = Number(process.env.PORT || 8787);
 const SITE_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -243,6 +244,115 @@ function tick() {
 }
 setInterval(tick, 700);
 
+/* ---------------- company mode (Claude Code ヘッドレス案件管理) ----------------
+ * 案件ごとに `claude -p --input-format stream-json` の子プロセスを起動し、
+ * UI から指示 (instruct) を stdin に流し込み、stdout の stream-json を SSE 化する。
+ */
+const CLAUDE_BIN = process.env.CLAUDE_BIN || 'claude';
+const company = new Map(); // id -> {id,name,cwd,status,lastReport,lastInstruction,proc,startedAt}
+const MAX_CASES = 6;
+
+function caseView(c) {
+  return { id: c.id, name: c.name, cwd: c.cwd, status: c.status,
+    lastReport: c.lastReport, lastInstruction: c.lastInstruction };
+}
+
+function sendInstruction(c, text) {
+  try {
+    c.proc.stdin.write(JSON.stringify({
+      type: 'user',
+      message: { role: 'user', content: [{ type: 'text', text }] },
+    }) + '\n');
+  } catch {}
+  c.lastInstruction = text.slice(0, 200);
+  c.status = 'working';
+  broadcast({ t: 'c_instructed', id: c.id, text: text.slice(0, 200) });
+}
+
+function attachCaseProcess(c) {
+  let stdoutBuf = '';
+  c.proc.stdout.on('data', (chunk) => {
+    stdoutBuf += chunk.toString('utf8');
+    const lines = stdoutBuf.split('\n');
+    stdoutBuf = lines.pop() || '';
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s) continue;
+      let d;
+      try { d = JSON.parse(s); } catch { continue; }
+      if (d.type === 'assistant' && d.message && Array.isArray(d.message.content)) {
+        for (const block of d.message.content) {
+          if (block.type === 'text' && typeof block.text === 'string') {
+            c.lastReport = block.text.slice(0, 600);
+            broadcast({ t: 'c_text', id: c.id, text: block.text.slice(0, 400) });
+          } else if (block.type === 'tool_use') {
+            const name = block.name || '?';
+            const input = block.input || {};
+            let detail;
+            if (name === 'Agent' || name === 'Task') {
+              detail = String(input.description || '').slice(0, 120);
+            } else {
+              detail = String(input.description || input.file_path || input.pattern
+                || input.command || input.query || '').slice(0, 120);
+            }
+            broadcast({ t: 'c_tool', id: c.id, name, detail });
+          }
+        }
+      } else if (d.type === 'result') {
+        c.status = 'idle';
+        broadcast({ t: 'c_done', id: c.id, result: String(d.result || '').slice(0, 300) });
+      } else if (d.type === 'system' && d.subtype === 'init') {
+        broadcast({ t: 'c_ready', id: c.id });
+      }
+      // パースできても該当しない type は無視
+    }
+  });
+  c.proc.stderr.on('data', (chunk) => {
+    const now = Date.now();
+    if (c.lastErrAt && now - c.lastErrAt < 5000) return; // 連発防止: 5秒に1回
+    c.lastErrAt = now;
+    broadcast({ t: 'c_err', id: c.id, text: chunk.toString('utf8').slice(0, 200) });
+  });
+  c.proc.on('exit', (code) => {
+    if (c.status !== 'stopped') c.status = 'ended';
+    broadcast({ t: 'c_exit', id: c.id, code });
+  });
+}
+
+function hireCase({ name, cwd, prompt, model }) {
+  const id = 'c' + Date.now().toString(36);
+  const useCwd = cwd || projectCwd;
+  let proc;
+  try {
+    proc = spawn(CLAUDE_BIN, [
+      '-p', '--output-format', 'stream-json', '--input-format', 'stream-json',
+      '--verbose', '--permission-mode', 'acceptEdits', '--model', model || 'opus',
+    ], { cwd: useCwd, stdio: ['pipe', 'pipe', 'pipe'] });
+  } catch {
+    return { ok: false, error: 'claude CLIが見つかりません' };
+  }
+  const c = {
+    id, name: name || id, cwd: useCwd, status: 'working',
+    lastReport: '', lastInstruction: '', proc, startedAt: Date.now(),
+  };
+  // spawn の ENOENT 等は非同期で 'error' として飛ぶ。ここで拾って未捕捉クラッシュを防ぎ、
+  // UI には c_err で通知する (HTTP 応答は既に {ok:true} を返している)。
+  proc.on('error', () => {
+    if (c.status !== 'stopped') c.status = 'ended';
+    broadcast({ t: 'c_err', id: c.id, text: 'claude CLIが見つかりません' });
+  });
+  company.set(id, c);
+  attachCaseProcess(c);
+  if (prompt) sendInstruction(c, prompt);
+  return { ok: true, id };
+}
+
+function killAllCases() {
+  for (const c of company.values()) {
+    try { c.proc.kill('SIGTERM'); } catch {}
+  }
+}
+
 /* ---------------- HTTP server (SSE + static) ---------------- */
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript',
   '.mjs': 'text/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
@@ -262,6 +372,62 @@ const server = http.createServer((req, res) => {
     req.on('close', () => clients.delete(res));
     return;
   }
+
+  /* ---- company mode API ---- */
+  if (url.pathname.startsWith('/company/')) {
+    const jsonHead = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    };
+    const sendJson = (code, obj) => { res.writeHead(code, jsonHead); res.end(JSON.stringify(obj)); };
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'content-type',
+      });
+      res.end();
+      return;
+    }
+    if (url.pathname === '/company/state' && req.method === 'GET') {
+      sendJson(200, { ok: true, cases: [...company.values()].map(caseView) });
+      return;
+    }
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk) => { body += chunk; });
+      req.on('end', () => {
+        let data;
+        try { data = JSON.parse(body); } catch { sendJson(400, { ok: false, error: 'invalid JSON' }); return; }
+        if (url.pathname === '/company/hire') {
+          if (company.size >= MAX_CASES) { sendJson(400, { ok: false, error: '案件は最大6件までです' }); return; }
+          const r = hireCase(data || {});
+          sendJson(r.ok ? 200 : 200, r);
+          return;
+        }
+        if (url.pathname === '/company/instruct') {
+          const c = company.get(data && data.id);
+          if (!c) { sendJson(400, { ok: false, error: 'unknown id' }); return; }
+          sendInstruction(c, String((data && data.text) || ''));
+          sendJson(200, { ok: true });
+          return;
+        }
+        if (url.pathname === '/company/stop') {
+          const c = company.get(data && data.id);
+          if (!c) { sendJson(400, { ok: false, error: 'unknown id' }); return; }
+          try { c.proc.kill('SIGTERM'); } catch {}
+          c.status = 'stopped';
+          sendJson(200, { ok: true });
+          return;
+        }
+        sendJson(404, { ok: false, error: 'not found' });
+      });
+      return;
+    }
+    sendJson(404, { ok: false, error: 'not found' });
+    return;
+  }
+
   // static
   let p = decodeURIComponent(url.pathname);
   if (p === '/') p = '/agents.html';
@@ -280,5 +446,15 @@ server.listen(PORT, () => {
   console.log(`[bridge] events : http://localhost:${PORT}/events`);
   console.log(`[bridge] project: ${projectCwd}`);
   console.log(`[bridge] logs   : ${transcriptDir}`);
+  console.log(`[bridge] company mode: POST /company/hire で案件を雇用できます (CLAUDE_BIN=${CLAUDE_BIN})`);
   switchToNewestFile();
 });
+
+/* ---------------- shutdown: 全子プロセスを kill ---------------- */
+function shutdown() {
+  killAllCases();
+  try { server.close(); } catch {}
+  process.exit(0);
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

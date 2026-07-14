@@ -82,6 +82,8 @@ body{
 .modes button:hover{color:var(--ink)}
 .modes button.active{background:var(--accent);color:#1a1d26}
 .modes button.active[data-mode="live"]{background:var(--c-back)}
+.modes button.active[data-mode="company"]{background:var(--accent-2)}
+body[data-mode="company"] .agent{cursor:pointer}
 .iconbtn{
   width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
   color:var(--ink-soft);font-size:16px;cursor:pointer;transition:.15s;
@@ -105,6 +107,34 @@ body{
 .settings .row button.primary{background:var(--accent);border-color:var(--accent);color:#1a1d26}
 .settings .warn{font-size:11px;color:#e0a15c;background:rgba(224,161,92,.08);border:1px solid rgba(224,161,92,.25);
   border-radius:8px;padding:8px 10px;margin-top:12px;line-height:1.55}
+/* 採用/カルテモーダルは .settings を流用。textarea/selectを追加スタイル */
+.settings textarea,.settings select{width:100%;font-family:var(--mono);font-size:13px;color:var(--ink);
+  padding:10px 12px;border-radius:10px;background:#0f1119;border:1px solid var(--line);outline:none}
+.settings textarea{resize:vertical;min-height:64px;line-height:1.5}
+.settings textarea:focus,.settings select:focus{border-color:var(--accent)}
+.hire-err{font-size:12px;color:#ff9b9b;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.4);
+  border-radius:8px;padding:8px 10px;margin-top:12px;line-height:1.5}
+/* ---- 会社モード: 案件カルテ本文 ---- */
+.case-inst{background:#0f1119;border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.5;color:var(--ink-soft);padding:8px 12px;white-space:pre-wrap;word-break:break-word}
+.case-report{background:#0f1119;border:1px solid var(--line);border-radius:10px;
+  font-family:var(--mono);font-size:11px;line-height:1.55;color:#a8d0a2;
+  padding:10px 12px;max-height:30vh;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.case-ops{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.case-ops button{font-family:var(--sans);font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;
+  cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);transition:.15s}
+.case-ops button:hover{border-color:var(--accent)}
+
+/* ---- 会社モード: デスク上の案件プレート ---- */
+.caseplate{
+  position:absolute;transform:translate(-50%,-50%);z-index:30;pointer-events:none;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+  padding:2px 8px;border-radius:999px;
+  background:rgba(10,12,18,.82);border:1px solid rgba(255,255,255,.14);
+  font-size:10px;font-weight:700;color:#fff;box-shadow:0 6px 14px rgba(0,0,0,.4);
+}
+.caseplate .cdot{width:7px;height:7px;border-radius:50%;flex:none;background:#727a90}
+.caseplate .cname{max-width:120px;overflow:hidden;text-overflow:ellipsis}
 
 /* ---- big office code monitor ---- */
 .monitor{
@@ -554,6 +584,7 @@ body{
       <button data-mode="demo" class="active" title="台本による演出モード">🎬 デモ</button>
       <button data-mode="ai" title="会話と成果物を本物のOpusが生成">🤖 AI</button>
       <button data-mode="live" title="実際のClaude Codeセッションを中継">📡 LIVE</button>
+      <button data-mode="company" title="社長になって案件ごとにAI社員を雇う">🏢 会社</button>
     </nav>
     <div class="spacer"></div>
     <div class="status-pill" id="statusPill"><span class="beat"></span><span id="statusText">待機中 — 指示をどうぞ</span></div>
@@ -610,6 +641,57 @@ body{
           <button id="settingsClear">キーを消去</button>
           <button id="settingsCancel">閉じる</button>
           <button class="primary" id="settingsSave">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- hire modal (会社モード: 案件を雇う) -->
+    <div class="settings" id="hireModal">
+      <div class="card">
+        <h3>🏢 案件を雇う</h3>
+        <p>新しい案件のために Claude Code の社員（ヘッドレスプロセス）を雇います。社長のあなたが方針を示せば、担当社員が自律的に作業します。</p>
+        <label>案件名 <span style="color:#e07a9c">*必須</span></label>
+        <input id="hireName" type="text" placeholder="例：着地ページのリニューアル" autocomplete="off" />
+        <label>作業フォルダ（絶対パス・省略可）</label>
+        <input id="hireCwd" type="text" placeholder="/Users/you/projects/site（未入力ならブリッジ既定）" autocomplete="off" />
+        <label>最初の指示 <span style="color:#e07a9c">*必須</span></label>
+        <textarea id="hirePrompt" rows="3" placeholder="例：トップページのヒーローを刷新して。方針は温かみと余白重視で。"></textarea>
+        <label>モデル</label>
+        <select id="hireModel">
+          <option value="opus">opus（既定・高品質）</option>
+          <option value="sonnet">sonnet（バランス）</option>
+          <option value="haiku">haiku（高速・軽量）</option>
+        </select>
+        <div class="hire-err" id="hireErr" hidden></div>
+        <div class="row">
+          <button id="hireCancel">閉じる</button>
+          <button class="primary" id="hireSubmit">雇用する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- case modal (会社モード: 案件カルテ) -->
+    <div class="settings" id="caseModal">
+      <div class="card">
+        <h3 id="caseTitle">📁 案件カルテ</h3>
+        <p id="caseSub">状態: —</p>
+        <label>受けている指示</label>
+        <div class="case-inst" id="caseInst">—</div>
+        <label>📄 最近の報告</label>
+        <div class="case-report" id="caseReport">まだ報告はありません</div>
+        <div class="case-ops">
+          <button data-op="approve">✅ 承認・進めて</button>
+          <button data-op="report">📝 報告して</button>
+          <button data-op="stop">🔴 一旦ストップ</button>
+        </div>
+        <label>自由指示</label>
+        <div class="cmd" style="margin-top:4px">
+          <input id="caseFreeInput" type="text" placeholder="この案件への指示を入力…" autocomplete="off" />
+          <button id="caseFreeSend">送信</button>
+        </div>
+        <div class="hire-err" id="caseErr" hidden></div>
+        <div class="row">
+          <button id="caseClose">閉じる</button>
         </div>
       </div>
     </div>
@@ -716,6 +798,12 @@ class Agent{
     this.moodMark=el.querySelector('.moodmark');
     this.workFill=el.querySelector('.workbar > i');
     this.screen=document.getElementById('screen-'+this.id);
+    // 会社モード: 担当案件があればクリックでカルテを開く
+    el.addEventListener('click',()=>{
+      if(MODE!=='company') return;
+      const cid=caseIdForMember(this.id);
+      if(cid) openCaseModal(cid);
+    });
     this.place();
   }
   place(){ this.el.style.left=this.x+'%'; this.el.style.top=this.y+'%';
@@ -1157,17 +1245,27 @@ function setMode(m){
   if(jobRunning){ addSys('ジョブ実行中はモードを変更できません'); return; }
   if(m==='ai' && !SETTINGS.apiKey){ openSettings(); addSys('AIモードにはAPIキーが必要です'); }
   if(MODE==='live') disconnectLive();
+  if(MODE==='company') leaveCompany();
   MODE=m;
+  document.body.dataset.mode=m;
   if(hintEl) hintEl.style.opacity='0';
   modesEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
   renderTaskBoard();
   const inputEl=document.getElementById('cmdInput');
   if(m==='live'){
     inputEl.placeholder='LIVEモード: Claude Codeの実セッションを中継中（指示はターミナルから）';
-    inputEl.disabled=true; sendBtn.disabled=true;
+    inputEl.disabled=true; sendBtn.disabled=true; sendBtn.textContent='指示する';
     connectLive();
+  }else if(m==='company'){
+    // 会社モード: LIVEと同じ /events SSE を共用しつつ、案件は /company/* API で操作
+    inputEl.placeholder='社長として全体方針をどうぞ（案件個別の指示はキャラをクリック）';
+    inputEl.disabled=true; sendBtn.disabled=false; sendBtn.textContent='＋ 案件を雇う';
+    setStatus('会社モード — あなたは社長です。案件を雇いましょう', false);
+    addSys('会社モード: 案件ごとにAI社員（Claude Code）を雇い、社長として指示します。社員をクリックでカルテを開けます。');
+    connectLive();
+    loadCompanyState();
   }else{
-    inputEl.disabled=false; sendBtn.disabled=false;
+    inputEl.disabled=false; sendBtn.disabled=false; sendBtn.textContent='指示する';
     inputEl.placeholder = m==='ai'
       ? 'Opusに作らせたいものを入力（例：温泉旅館のLP作って）'
       : 'やってほしいことを入力（例：LP作って / バグ直して / 記事書いて）';
@@ -1557,7 +1655,7 @@ const filesHeadEl=document.getElementById('filesHead');
 const TASK_ICON={pending:'☐', in_progress:'🔨', completed:'✅'};
 function renderTaskBoard(){
   const items=[...taskBoard.values()];
-  taskboardEl.classList.toggle('show', MODE==='live' && (items.length>0 || liveFiles.length>0));
+  taskboardEl.classList.toggle('show', ['live','company'].includes(MODE) && (items.length>0 || liveFiles.length>0));
   const done=items.filter(t=>t.status==='completed').length;
   document.getElementById('taskCount').textContent=items.length?done+'/'+items.length:'';
   taskListEl.innerHTML='';
@@ -1597,7 +1695,7 @@ function bumpStat(key){
   liveStats[key]++;
   const el=document.getElementById('st'+key[0].toUpperCase()+key.slice(1));
   if(el) el.textContent=liveStats[key];
-  statshudEl.hidden = MODE!=='live';
+  statshudEl.hidden = !['live','company'].includes(MODE);
 }
 function resetStats(){
   for(const k of Object.keys(liveStats)){ liveStats[k]=0;
@@ -1701,7 +1799,7 @@ function tickerSay(pool,vars){
 }
 /* キューに実況文を追加(最大8件、あふれたら古いものを捨てる) */
 function ticker(text){
-  if(MODE!=='live') return;
+  if(!['live','company'].includes(MODE)) return;
   tickerQueue.push(text);
   while(tickerQueue.length>8) tickerQueue.shift();
   if(!tickerTimer) tickerPump();   // 待機中なら即座に1件表示
@@ -1712,7 +1810,7 @@ function tickerPump(){
   tickerTimer=setTimeout(tickerPump, 1600);
 }
 function tickerShow(text){
-  if(MODE!=='live') return;
+  if(!['live','company'].includes(MODE)) return;
   tickerEl.hidden=false;
   tickerEl.classList.remove('fade');
   tickerLineEl.textContent=text;
@@ -1945,8 +2043,291 @@ async function handleLiveEvent(ev){
       liveAssign.delete(ev.chain);
       break;
     }
+    /* ===== 会社モード: 案件(ヘッドレスClaude Code)からのイベント ===== */
+    case 'c_ready': case 'c_text': case 'c_tool': case 'c_done':
+    case 'c_instructed': case 'c_err': case 'c_exit':
+      // 雇用直後はHTTPレスポンスよりSSEが先に届くことがある → 割当まで貯めて再生
+      if(ev.id && !caseInfo.has(ev.id)){ bufferCaseEvent(ev); break; }
+      return handleCaseEvent(ev);
   }
 }
+/* 会社モードイベント本体 (割当済みの案件のみ到達) */
+function handleCaseEvent(ev){
+  switch(ev.t){
+    case 'c_ready': {
+      const cs=caseInfo.get(ev.id), c=companyMemberFor(ev.id);
+      addSys('🏢 '+(cs?cs.name:'案件')+' の担当者が起動しました');
+      if(c) c.emote('🫡');
+      break;
+    }
+    case 'c_text': {
+      const cs=caseInfo.get(ev.id), c=companyMemberFor(ev.id);
+      const t=String(ev.text||'');
+      if(c){ c.say(t.slice(0,50),{dur:3200,log:false}); addMsg(c.id, t.slice(0,180)); }
+      if(cs) cs.lastReport=t;
+      if(caseModalId===ev.id) document.getElementById('caseReport').textContent=t;
+      break;
+    }
+    case 'c_tool': {
+      const c=companyMemberFor(ev.id);
+      bumpStat('tools');
+      if(ev.name==='Write'||ev.name==='Edit'||ev.name==='NotebookEdit'){ bumpStat('edits'); if(ev.detail) recordFile(ev.detail); }
+      if(c){ c.emote(TOOL_ICON[ev.name]||'🔧'); setLiveWorking(c,true); }
+      if(Math.random()<0.6) tickerSay(tickerPoolForTool(ev.name||''),{name:c?c.name:'',detail:ev.detail||''});
+      break;
+    }
+    case 'c_done': {
+      const cs=caseInfo.get(ev.id), c=companyMemberFor(ev.id);
+      if(cs){ cs.status='idle'; updateCasePlate(ev.id); }
+      if(c){ setLiveWorking(c,false); c.setMood('happy',6000); c.emote('✅');
+        addDone(c.id,(cs?cs.name:'案件')+': 一区切りつきました'); }
+      if(ev.result){ if(cs) cs.lastReport=String(ev.result);
+        if(caseModalId===ev.id) document.getElementById('caseReport').textContent=String(ev.result); }
+      tickerSay('done',{name:c?c.name:''});
+      break;
+    }
+    case 'c_instructed': {
+      const cs=caseInfo.get(ev.id), c=companyMemberFor(ev.id);
+      if(cs){ if(ev.text) cs.lastInstruction=String(ev.text); cs.status='working'; updateCasePlate(ev.id); }
+      if(c) setLiveWorking(c,true);
+      if(caseModalId===ev.id && ev.text) document.getElementById('caseInst').textContent=String(ev.text);
+      addSys('社長指示 → '+(cs?cs.name:'案件')+': '+String(ev.text||'').slice(0,60));
+      break;
+    }
+    case 'c_err': {
+      const c=companyMemberFor(ev.id);
+      if(c) oops(c);
+      bumpStat('errors');
+      addErr(String(ev.text||ev.detail||'案件でエラーが発生しました').slice(0,100));
+      break;
+    }
+    case 'c_exit': {
+      const cs=caseInfo.get(ev.id), c=companyMemberFor(ev.id);
+      if(cs){ cs.status='ended'; updateCasePlate(ev.id); }
+      if(c){ setLiveWorking(c,false); c.setMood('normal'); c.setState('idle'); c.toDesk(); }
+      addSys('🏢 案件「'+(cs?cs.name:'案件')+'」が終了しました'+(ev.code!=null?'（code '+ev.code+'）':''));
+      caseAssign.delete(ev.id);   // 社員を解放(プレートは灰色のまま残す)
+      break;
+    }
+  }
+}
+
+/* ============================================================
+   COMPANY MODE — 「会社」: あなたが社長、案件ごとにAI社員を雇う
+   同一ブリッジ(agents-bridge.mjs)の /company/* API と /events SSE を使う
+   ============================================================ */
+const COMPANY_POOL=['design','front','back','write','qa']; // pm以外の5人が社員
+const caseAssign=new Map();   // caseId -> memberId
+const caseInfo=new Map();     // caseId -> {id,name,cwd,status,lastReport,lastInstruction}
+const casePlates=new Map();   // caseId -> plate element
+let caseModalId=null;
+
+/* SETTINGS.bridge から /events を除いた origin (例 http://localhost:8787) */
+function bridgeOrigin(){
+  try{ return new URL(SETTINGS.bridge).origin; }
+  catch{ return String(SETTINGS.bridge||'').replace(/\/events\/?$/,''); }
+}
+function freeCompanyMember(){
+  const used=new Set(caseAssign.values());
+  return COMPANY_POOL.find(id=>!used.has(id));
+}
+function companyMemberFor(caseId){ const mid=caseAssign.get(caseId); return mid?byId[mid]:null; }
+function caseIdForMember(memberId){
+  for(const [cid,mid] of caseAssign) if(mid===memberId) return cid;
+  return null;
+}
+
+/* --- デスク上の案件プレート(位置=担当社員のデスク上、状態ドット付き) --- */
+const CASE_DOT={working:'#e0b15c', idle:'#7ad19a', stopped:'#727a90', ended:'#727a90'};
+function makeCasePlate(caseId){
+  const c=companyMemberFor(caseId); if(!c) return;
+  let plate=casePlates.get(caseId);
+  if(!plate){
+    plate=document.createElement('div'); plate.className='caseplate';
+    plate.innerHTML='<span class="cdot"></span><span class="cname"></span>';
+    plate.style.cursor='pointer';
+    plate.title='クリックで案件カルテを開く';
+    plate.addEventListener('click',()=>openCaseModal(caseId));
+    world.appendChild(plate); casePlates.set(caseId,plate);
+  }
+  plate.style.left=c.desk.x+'%';
+  plate.style.top=(c.desk.y-13)+'%';
+  updateCasePlate(caseId);
+}
+function updateCasePlate(caseId){
+  const plate=casePlates.get(caseId), cs=caseInfo.get(caseId);
+  if(!plate||!cs) return;
+  plate.querySelector('.cdot').style.background=CASE_DOT[cs.status]||'#727a90';
+  plate.querySelector('.cname').textContent=cs.name;
+}
+
+/* --- 案件を空き社員に割り当て(会議テーブルへ歩いて挨拶→デスクで作業) --- */
+/* 割当前に届いた案件イベントのバッファ (HTTPレスポンスよりSSEが先に届くレース対策) */
+const caseEventBuffer=new Map(); // caseId -> [events]
+function bufferCaseEvent(ev){
+  const a=caseEventBuffer.get(ev.id)||[];
+  a.push(ev); if(a.length>30) a.shift();
+  caseEventBuffer.set(ev.id,a);
+}
+function assignCase(cs){
+  const memberId=freeCompanyMember();
+  if(!memberId) return false;
+  caseInfo.set(cs.id, cs);
+  caseAssign.set(cs.id, memberId);
+  makeCasePlate(cs.id);
+  // 割当前に届いていたイベントを再生
+  const buf=caseEventBuffer.get(cs.id);
+  if(buf){ caseEventBuffer.delete(cs.id); buf.forEach(e=>handleLiveEvent(e)); }
+  const c=byId[memberId];
+  (async()=>{
+    await c.moveTo(MEETING.x+(Math.random()*10-5), MEETING.y-17);
+    c.say(cs.name+'、担当します！',{dur:2200,log:false});
+    addMsg(c.id, cs.name+'、担当します！');
+    await sleep(700);
+    await c.toDesk();
+    if(cs.status==='working') setLiveWorking(c,true);
+  })();
+  return true;
+}
+
+/* --- 会社モード開始時: 既存案件(working/idle)を空き社員に復元 --- */
+async function loadCompanyState(){
+  let data;
+  try{
+    const res=await fetch(bridgeOrigin()+'/company/state');
+    data=await res.json();
+  }catch(e){ addErr('ブリッジに接続できません（会社の状態を取得できませんでした）'); return; }
+  if(MODE!=='company') return;
+  if(!data||!data.ok||!Array.isArray(data.cases)) return;
+  let n=0;
+  for(const cs of data.cases){
+    if(!['working','idle'].includes(cs.status)) continue;
+    if(!assignCase({id:cs.id, name:cs.name, cwd:cs.cwd, status:cs.status,
+        lastReport:cs.lastReport||'', lastInstruction:cs.lastInstruction||''})){
+      addSys('社員が満員のため未表示の案件があります'); break;
+    }
+    n++;
+  }
+  if(n) addSys('🏢 稼働中の案件 '+n+'件を復元しました');
+}
+
+/* --- モード離脱時: プレート除去・社員リセット(子プロセスは止めない) --- */
+function leaveCompany(){
+  disconnectLive();               // ES切断 & チームを初期状態へ
+  caseAssign.clear(); caseInfo.clear();
+  casePlates.forEach(p=>p.remove()); casePlates.clear();
+  closeHireModal(); closeCaseModal();
+  document.body.dataset.mode='';
+}
+
+/* ============ 採用モーダル ============ */
+const hireModalEl=document.getElementById('hireModal');
+function openHireModal(){
+  document.getElementById('hireName').value='';
+  document.getElementById('hireCwd').value='';
+  document.getElementById('hirePrompt').value='';
+  document.getElementById('hireModel').value='opus';
+  const err=document.getElementById('hireErr'); err.hidden=true; err.textContent='';
+  hireModalEl.classList.add('show');
+  document.getElementById('hireName').focus();
+}
+function closeHireModal(){ hireModalEl.classList.remove('show'); }
+function showHireErr(msg){ const e=document.getElementById('hireErr'); e.textContent=msg; e.hidden=false; }
+async function submitHire(){
+  const name=document.getElementById('hireName').value.trim();
+  const cwd=document.getElementById('hireCwd').value.trim();
+  const prompt=document.getElementById('hirePrompt').value.trim();
+  const model=document.getElementById('hireModel').value;
+  if(!name){ showHireErr('案件名を入力してください'); return; }
+  if(!prompt){ showHireErr('最初の指示を入力してください'); return; }
+  if(!freeCompanyMember()){ showHireErr('社員が全員ふさがっています。既存の案件をストップしてから雇ってください。'); return; }
+  const btn=document.getElementById('hireSubmit'); btn.disabled=true;
+  let data;
+  try{
+    const res=await fetch(bridgeOrigin()+'/company/hire',{
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({name, cwd, prompt, model}),
+    });
+    data=await res.json();
+  }catch(e){ btn.disabled=false; showHireErr('ブリッジに接続できません。node tools/agents-bridge.mjs を起動してください。'); return; }
+  btn.disabled=false;
+  if(!data||!data.ok){ showHireErr(data&&data.error?String(data.error):'雇用に失敗しました'); return; }
+  const cs={id:data.id, name, cwd, status:'working', lastReport:'', lastInstruction:prompt};
+  if(!assignCase(cs)){ showHireErr('社員が満員です'); return; }
+  closeHireModal();
+  addSys('🏢 案件「'+name+'」を雇いました（担当: '+byId[caseAssign.get(cs.id)].name+' / '+model+'）');
+}
+document.getElementById('hireSubmit').onclick=submitHire;
+document.getElementById('hireCancel').onclick=closeHireModal;
+hireModalEl.onclick=e=>{ if(e.target===hireModalEl) closeHireModal(); };
+
+/* ============ 案件カルテ(社員をクリックで開く) ============ */
+const caseModalEl=document.getElementById('caseModal');
+const CASE_STLABEL={working:'作業中', idle:'待機中', stopped:'停止', ended:'終了'};
+function openCaseModal(caseId){
+  const cs=caseInfo.get(caseId); if(!cs) return;
+  caseModalId=caseId;
+  const c=companyMemberFor(caseId);
+  document.getElementById('caseTitle').textContent='📁 '+cs.name;
+  document.getElementById('caseSub').textContent='担当: '+(c?c.name:'—')+' ・ 状態: '+(CASE_STLABEL[cs.status]||cs.status);
+  document.getElementById('caseInst').textContent=cs.lastInstruction||'—';
+  document.getElementById('caseReport').textContent=cs.lastReport||'まだ報告はありません';
+  const err=document.getElementById('caseErr'); err.hidden=true; err.textContent='';
+  document.getElementById('caseFreeInput').value='';
+  caseModalEl.classList.add('show');
+}
+function closeCaseModal(){ caseModalEl.classList.remove('show'); caseModalId=null; }
+function showCaseErr(msg){ const e=document.getElementById('caseErr'); e.textContent=msg; e.hidden=false; }
+async function caseInstruct(caseId, text){
+  const cs=caseInfo.get(caseId); if(!cs) return;
+  let data;
+  try{
+    const res=await fetch(bridgeOrigin()+'/company/instruct',{
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({id:caseId, text}),
+    });
+    data=await res.json();
+  }catch(e){ showCaseErr('ブリッジに接続できません…'); return; }
+  if(!data||!data.ok){ showCaseErr('指示の送信に失敗しました'); return; }
+  cs.lastInstruction=text; cs.status='working'; updateCasePlate(caseId);
+  if(caseModalId===caseId) document.getElementById('caseInst').textContent=text;
+  const c=companyMemberFor(caseId);
+  if(c){ c.emote('📥'); setLiveWorking(c,true); }
+}
+async function caseStop(caseId){
+  const cs=caseInfo.get(caseId); if(!cs) return;
+  let data;
+  try{
+    const res=await fetch(bridgeOrigin()+'/company/stop',{
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({id:caseId}),
+    });
+    data=await res.json();
+  }catch(e){ showCaseErr('ブリッジに接続できません…'); return; }
+  if(!data||!data.ok){ showCaseErr('停止に失敗しました'); return; }
+  cs.status='stopped'; updateCasePlate(caseId);
+  const c=companyMemberFor(caseId);
+  if(c) setLiveWorking(c,false);
+  addSys('🔴 案件「'+cs.name+'」を停止しました');
+  closeCaseModal();
+}
+document.querySelectorAll('#caseModal .case-ops button').forEach(b=>{
+  b.onclick=()=>{
+    if(!caseModalId) return;
+    const op=b.dataset.op;
+    if(op==='approve') caseInstruct(caseModalId,'承認します。その方針で進めてください。');
+    else if(op==='report') caseInstruct(caseModalId,'現在の進捗と次の一手を3行で報告してください。');
+    else if(op==='stop') caseStop(caseModalId);
+  };
+});
+(function(){
+  const send=()=>{ const v=document.getElementById('caseFreeInput').value.trim();
+    if(v && caseModalId){ caseInstruct(caseModalId, v); document.getElementById('caseFreeInput').value=''; } };
+  document.getElementById('caseFreeSend').onclick=send;
+  document.getElementById('caseFreeInput').addEventListener('keydown',e=>{ if(e.key==='Enter') send(); });
+})();
+document.getElementById('caseClose').onclick=closeCaseModal;
+caseModalEl.onclick=e=>{ if(e.target===caseModalEl) closeCaseModal(); };
 
 /* ============ command handling ============ */
 const input=document.getElementById('cmdInput');
@@ -1959,7 +2340,7 @@ function pickWorkflow(text){
   return WORKFLOWS.feature; // default
 }
 async function dispatch(text){
-  if(jobRunning || MODE==='live') return;
+  if(jobRunning || MODE==='live' || MODE==='company') return;
   text=(text||'').trim();
   jobRunning=true;
   sendBtn.disabled=true; input.value='';
@@ -1976,7 +2357,7 @@ async function dispatch(text){
     TEAM.forEach(a=>{ if(byId[a.id].state==='idle') byId[a.id].toDesk(); });
   }
 }
-sendBtn.onclick=()=>dispatch(input.value);
+sendBtn.onclick=()=>{ if(MODE==='company'){ openHireModal(); return; } dispatch(input.value); };
 input.addEventListener('keydown',e=>{ if(e.key==='Enter') dispatch(input.value); });
 
 /* quick command chips */
